@@ -14,6 +14,23 @@ $TargetRepo = "sovereign-mesh"
 $RemoteUrlHttps = "https://github.com/$TargetOrg/$TargetRepo.git"
 $RemoteUrlSsh = "git@github.com:$TargetOrg/$TargetRepo.git"
 
+# Check if git is available in Windows. If not, route git operations through WSL engine!
+$GitInstalled = $false
+try {
+    $null = Get-Command git -ErrorAction Stop
+    $GitInstalled = $true
+} catch {}
+
+if (-not $GitInstalled) {
+    Write-Host "[WSL DETECTED] 'git' is not found in Windows PATH." -ForegroundColor Yellow
+    Write-Host "Executing all Git operations securely inside WSL Ubuntu container context..." -ForegroundColor Cyan
+    Write-Host ""
+    
+    function git {
+        wsl --cd /home/aellok/sovereign_mesh git $args
+    }
+}
+
 Clear-Host
 Write-Host "=====================================================================" -ForegroundColor Cyan
 Write-Host "         🌀 JETWEB SWARM MESH - AUTOMATED GITHUB PUBLISHER           " -ForegroundColor Cyan
