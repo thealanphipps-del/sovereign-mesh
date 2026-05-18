@@ -2,14 +2,14 @@
 # 🌀 JETWEB MESH - AUTOMATED GITHUB UPLOADER SCRIPT
 # =========================================================================================
 # This PowerShell script automates the publishing of your Sovereign Swarm Mesh and 
-# JetWeb Time Machine codebase directly under your GitHub account: pqr-info
+# JetWeb Time Machine codebase directly under your GitHub account: Pqr-info
 #
 # Run this script directly on your Windows host:
 # Powershell -ExecutionPolicy Bypass -File .\publish_to_github.ps1
 # =========================================================================================
 
 $RepoPath = "\\wsl.localhost\Ubuntu\home\aellok\sovereign_mesh"
-$TargetOrg = "pqr-info"
+$TargetOrg = "Pqr-info"
 $TargetRepo = "sovereign-mesh"
 $RemoteUrlHttps = "https://github.com/$TargetOrg/$TargetRepo.git"
 $RemoteUrlSsh = "git@github.com:$TargetOrg/$TargetRepo.git"

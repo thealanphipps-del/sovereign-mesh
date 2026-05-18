@@ -3,7 +3,7 @@ name: 🚀 Feature / Agent Capability
 about: Propose a new capability for the Sovereign Mesh or swarm agent
 title: "[FEAT] "
 labels: enhancement
-assignees: pqr-info
+assignees: Pqr-info
 
 ---
 

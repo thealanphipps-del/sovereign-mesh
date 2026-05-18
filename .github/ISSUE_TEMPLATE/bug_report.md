@@ -3,7 +3,7 @@ name: 🐛 Bug Report
 about: Report a bug or unexpected behavior in the Sovereign Mesh
 title: "[BUG] "
 labels: bug
-assignees: pqr-info
+assignees: Pqr-info
 
 ---
 

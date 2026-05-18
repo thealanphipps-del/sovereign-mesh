@@ -1,11 +1,11 @@
 # Sovereign Mesh CODEOWNERS
 # These owners will be requested for review on all PRs
 
-* @pqr-info
+* @Pqr-info
 
 # Core mesh infrastructure
-/memory_bus/     @pqr-info
-/grpc_node/      @pqr-info
-/proto/          @pqr-info
-/tunnels/        @pqr-info
-/docs/           @pqr-info
+/memory_bus/     @Pqr-info
+/grpc_node/      @Pqr-info
+/proto/          @Pqr-info
+/tunnels/        @Pqr-info
+/docs/           @Pqr-info
