@@ -224,6 +224,66 @@ class SwarmDashboardHandler(http.server.BaseHTTPRequestHandler):
             self.send_json_response(response)
             return
 
+        # 7. REST 2.0 - Documentation API
+        elif path == "/api/v2/docs" or path == "/api/docs":
+            docs_list = [
+                {"id": "architecture", "title": "Sovereign Mesh Architecture & Consensus", "file": "architecture.md"},
+                {"id": "grpc-api", "title": "gRPC Control Bus API Contracts", "file": "grpc-api.md"},
+                {"id": "jetweb-time-machine", "title": "Jetweb Time Machine Mechanics", "file": "jetweb-time-machine.md"},
+                {"id": "memory-bus", "title": "High-Speed RAM Bus Specifications", "file": "memory-bus.md"},
+                {"id": "rt-compliance", "title": "Request Tracker (RT) Compliance Schema", "file": "rt-compliance.md"}
+            ]
+            response = {
+                "success": True,
+                "data": docs_list
+            }
+            self.send_json_response(response)
+            return
+
+        elif path.startswith("/api/v2/docs/") or path.startswith("/api/docs/"):
+            doc_id = path.split("/")[-1]
+            docs_map = {
+                "architecture": ("Sovereign Mesh Architecture & Consensus", "architecture.md"),
+                "grpc-api": ("gRPC Control Bus API Contracts", "grpc-api.md"),
+                "jetweb-time-machine": ("Jetweb Time Machine Mechanics", "jetweb-time-machine.md"),
+                "memory-bus": ("High-Speed RAM Bus Specifications", "memory-bus.md"),
+                "rt-compliance": ("Request Tracker (RT) Compliance Schema", "rt-compliance.md")
+            }
+
+            if doc_id in docs_map:
+                title, filename = docs_map[doc_id]
+                docs_dir = os.path.join(os.path.dirname(SCRIPT_DIR), "docs")
+                file_path = os.path.join(docs_dir, filename)
+                try:
+                    with open(file_path, "r", encoding="utf-8") as f:
+                        content = f.read()
+                    response = {
+                        "success": True,
+                        "data": {
+                            "id": doc_id,
+                            "title": title,
+                            "content": content
+                        }
+                    }
+                except Exception as e:
+                    response = {
+                        "success": False,
+                        "error": {
+                            "code": "FILE_READ_FAILED",
+                            "message": str(e)
+                        }
+                    }
+            else:
+                response = {
+                    "success": False,
+                    "error": {
+                        "code": "DOCUMENT_NOT_FOUND",
+                        "message": f"Documentation page '{doc_id}' not found."
+                    }
+                }
+            self.send_json_response(response)
+            return
+
         else:
             self.send_error(404, "REST 2.0 Resource not found")
 
@@ -315,6 +375,89 @@ class SwarmDashboardHandler(http.server.BaseHTTPRequestHandler):
                 response_data = {
                     "error": {
                         "code": "TIMETRAVEL_FAIL",
+                        "message": str(e)
+                    }
+                }
+
+            self.send_json_response(response_data)
+            return
+
+        elif self.path == "/api/v2/agents" or self.path == "/api/agents":
+            agent_id = payload.get("agent_id")
+            name = payload.get("name")
+            parent_agent_id = payload.get("parent_agent_id")
+            layer_level = int(payload.get("layer_level", 7))
+            specialty = payload.get("specialty")
+            subspecialty = payload.get("subspecialty")
+
+            if parent_agent_id == "" or parent_agent_id == "None":
+                parent_agent_id = None
+
+            try:
+                conn = sqlite3.connect(DB_PATH)
+                cursor = conn.cursor()
+                cursor.execute("""
+                    INSERT INTO agents (agent_id, name, parent_agent_id, layer_level, specialty, subspecialty)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                """, (agent_id, name, parent_agent_id, layer_level, specialty, subspecialty))
+                conn.commit()
+                conn.close()
+
+                response_data = {
+                    "success": True,
+                    "message": f"Agent '{agent_id}' successfully spawned and registered in 7-Layer Swarm Graph.",
+                    "data": {
+                        "agent_id": agent_id,
+                        "name": name,
+                        "parent_agent_id": parent_agent_id,
+                        "layer_level": layer_level,
+                        "specialty": specialty,
+                        "subspecialty": subspecialty
+                    }
+                }
+            except Exception as e:
+                response_data = {
+                    "success": False,
+                    "error": {
+                        "code": "SPAWN_AGENT_FAILED",
+                        "message": str(e)
+                    }
+                }
+
+            self.send_json_response(response_data)
+            return
+
+        elif self.path == "/api/v2/teleport" or self.path == "/api/teleport":
+            source_node_id = payload.get("source_node_id", "LAPTOP-TRAINING-AGENT")
+            target_node_id = payload.get("target_node_id", "AURORA-R9-SERVER")
+            memory_bus_offset = int(payload.get("memory_bus_offset", 0))
+            state_size = int(payload.get("state_size", 1024))
+            run_command = payload.get("run_command", "echo 'Agent materialization sequence completed.'")
+
+            channel = grpc.insecure_channel('127.0.0.1:1111')
+            stub = sync_pb2_grpc.AgentSyncStub(channel)
+            req = sync_pb2.TeleportRequest(
+                source_node_id=source_node_id,
+                target_node_id=target_node_id,
+                memory_bus_offset=memory_bus_offset,
+                state_size=state_size,
+                run_command=run_command
+            )
+            try:
+                res = stub.TeleportAgent(req)
+                response_data = {
+                    "success": res.success,
+                    "message": res.message,
+                    "data": {
+                        "execution_stdout": res.execution_stdout,
+                        "execution_stderr": res.execution_stderr
+                    }
+                }
+            except Exception as e:
+                response_data = {
+                    "success": False,
+                    "error": {
+                        "code": "TELEPORT_AGENT_FAILED",
                         "message": str(e)
                     }
                 }

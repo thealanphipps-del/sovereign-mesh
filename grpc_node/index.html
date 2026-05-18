@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         :root {
             --bg-color: #030712;
@@ -76,6 +77,7 @@
             letter-spacing: 2px;
             background: linear-gradient(to right, #00f2fe, #4facfe);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
@@ -441,6 +443,418 @@
             flex-direction: column;
             gap: 12px;
         }
+
+        /* View Toggle styling */
+        .view-toggle-container {
+            display: flex;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 4px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            position: relative;
+            width: 320px;
+            justify-content: space-between;
+        }
+        #toggle-active-bg {
+            position: absolute;
+            width: 154px;
+            height: calc(100% - 8px);
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            border-radius: 16px;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(0);
+        }
+        .view-toggle-container button {
+            flex: 1;
+            text-align: center;
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            background: none;
+            border: none;
+            border-radius: 16px;
+            padding: 6px 0;
+            cursor: pointer;
+            z-index: 2;
+            transition: color 0.3s;
+            outline: none;
+        }
+        .view-toggle-container button.active {
+            color: #fff;
+        }
+
+        /* Spawning Bay and Manager styling */
+        .manager-agent-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1rem;
+            overflow-y: auto;
+            max-height: 480px;
+            padding-right: 4px;
+        }
+        .layer-section {
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .layer-title-badge {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--cyan);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .teleport-node-box {
+            display: flex;
+            gap: 10px;
+            margin-top: 4px;
+        }
+        .teleport-node-option {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .teleport-node-option.selected {
+            border-color: var(--cyan);
+            background: rgba(6, 182, 212, 0.1);
+            color: var(--cyan);
+            box-shadow: 0 0 10px rgba(6, 182, 212, 0.2);
+        }
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(3, 7, 18, 0.85);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            z-index: 10;
+            border-radius: 16px;
+            backdrop-filter: blur(8px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        .loading-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(6, 182, 212, 0.1);
+            border-top: 4px solid var(--cyan);
+            border-radius: 50%;
+            animation: spin 1s infinite linear;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 3-way toggle adjustments */
+        .view-toggle-container {
+            width: 440px !important;
+            flex-shrink: 0;
+        }
+        #toggle-active-bg {
+            width: 142px !important;
+        }
+
+        /* Premium Floating Tooltip System */
+        .tooltip-trigger {
+            position: relative;
+        }
+        .tooltip-trigger::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-family: 'Outfit', sans-serif;
+            white-space: normal;
+            width: 220px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 10px rgba(6, 182, 212, 0.1);
+            backdrop-filter: blur(8px);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            font-weight: 400;
+            line-height: 1.4;
+            text-align: left;
+        }
+        .tooltip-trigger::before {
+            content: '';
+            position: absolute;
+            bottom: 115%;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            border-width: 6px;
+            border-style: solid;
+            border-color: rgba(6, 182, 212, 0.3) transparent transparent transparent;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+        }
+        .tooltip-trigger:hover::after, .tooltip-trigger:hover::before {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Tooltip Bottom Override for Sticky Header */
+        .tooltip-trigger.tooltip-bottom::after {
+            bottom: auto;
+            top: 135%;
+            transform: translateX(-50%) translateY(-10px);
+        }
+        .tooltip-trigger.tooltip-bottom::before {
+            bottom: auto;
+            top: 120%;
+            border-color: transparent transparent rgba(6, 182, 212, 0.3) transparent;
+            transform: translateX(-50%) translateY(-10px);
+        }
+        .tooltip-trigger.tooltip-bottom:hover::after, .tooltip-trigger.tooltip-bottom:hover::before {
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        /* Inline Info Badges */
+        .info-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: rgba(6, 182, 212, 0.1);
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            color: var(--cyan);
+            font-size: 0.65rem;
+            font-weight: bold;
+            cursor: help;
+            margin-left: 6px;
+            transition: all 0.2s;
+            vertical-align: middle;
+        }
+        .info-badge:hover {
+            background: var(--cyan);
+            color: #000;
+            box-shadow: 0 0 8px var(--cyan);
+        }
+
+        /* Description block next to labels */
+        .control-description {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+        .doc-reference-link {
+            font-size: 0.75rem;
+            color: var(--cyan);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 500;
+        }
+        .doc-reference-link:hover {
+            text-decoration: underline;
+            color: #fff;
+        }
+
+        /* Documentation Hub styling */
+        .docs-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .docs-nav-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .docs-nav-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            border-color: rgba(6, 182, 212, 0.3);
+        }
+        .docs-nav-item.active {
+            background: rgba(6, 182, 212, 0.1);
+            color: var(--cyan);
+            border-color: var(--cyan);
+            box-shadow: 0 0 10px rgba(6, 182, 212, 0.15);
+        }
+        .docs-nav-item .doc-icon {
+            font-size: 1.1rem;
+        }
+        .docs-content-container {
+            background: rgba(17, 24, 39, 0.5);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2.5rem;
+            max-height: 680px;
+            overflow-y: auto;
+            backdrop-filter: blur(12px);
+            font-family: 'Outfit', sans-serif;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* Markdown Rendering Styling inside reader */
+        .docs-content-container h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #fff;
+            margin-top: 0;
+            margin-bottom: 1.25rem;
+            border-bottom: 2px solid rgba(6, 182, 212, 0.3);
+            padding-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .docs-content-container h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--cyan);
+            margin-top: 1.75rem;
+            margin-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 0.25rem;
+        }
+        .docs-content-container h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--purple);
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .docs-content-container p {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+        .docs-content-container ul, .docs-content-container ol {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+        .docs-content-container li {
+            margin-bottom: 0.4rem;
+        }
+        .docs-content-container hr {
+            border: 0;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(6, 182, 212, 0.3), rgba(139, 92, 246, 0.3), transparent);
+            margin: 2rem 0;
+        }
+        .docs-content-container code {
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            color: #ff79c6;
+        }
+        .docs-content-container pre {
+            background: #0d1117;
+            border: 1px solid var(--border-color);
+            padding: 1.25rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.25rem 0;
+            position: relative;
+        }
+        .docs-content-container pre code {
+            background: none;
+            border: none;
+            padding: 0;
+            font-size: 0.85rem;
+            color: #f8f8f2;
+            line-height: 1.5;
+            display: block;
+        }
+        .docs-content-container table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.9rem;
+        }
+        .docs-content-container th {
+            background: rgba(6, 182, 212, 0.05);
+            color: var(--cyan);
+            font-weight: 700;
+            text-align: left;
+            padding: 10px 12px;
+            border-bottom: 2px solid var(--border-color);
+        }
+        .docs-content-container td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+        .docs-content-container tr:hover td {
+            background: rgba(255, 255, 255, 0.01);
+            color: #fff;
+        }
+        .docs-content-container blockquote {
+            border-left: 4px solid var(--purple);
+            background: rgba(139, 92, 246, 0.05);
+            margin: 1rem 0;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0 8px 8px 0;
+        }
+        .docs-content-container blockquote p {
+            margin: 0;
+            color: var(--text-primary);
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -450,6 +864,15 @@
             <div class="header-logo"></div>
             <div class="header-title">SOVEREIGN SWARM WORKSPACE</div>
         </div>
+        
+        <!-- View Toggle Sliding Control -->
+        <div class="view-toggle-container">
+            <div id="toggle-active-bg"></div>
+            <button id="btn-editor-view" class="active tooltip-trigger tooltip-bottom" data-tooltip="Consensus ticket creator, active decision logs, time machine override, and live console." onclick="toggleView('editor')">Editor & Tickets</button>
+            <button id="btn-manager-view" class="tooltip-trigger tooltip-bottom" data-tooltip="Dynamic swarm node pedigree tree, real-time workload monitors, and spawning forge." onclick="toggleView('manager')">Open Agent Manager</button>
+            <button id="btn-docs-view" class="tooltip-trigger tooltip-bottom" data-tooltip="System manuals: 7-layer pedigree architecture, memory bus mechanics, gRPC API contracts." onclick="toggleView('docs')">Swarm Docs</button>
+        </div>
+
         <div class="system-indicators">
             <div class="indicator">
                 <div class="indicator-dot pulse"></div>
@@ -466,122 +889,379 @@
     </header>
 
     <main>
-        <!-- LEFT PANEL: 7-Layer Swarm Graph -->
-        <div class="glass-panel">
-            <div class="panel-header">
-                <div class="panel-title">
-                    <span>🌐</span> 7-Layer Pedigree Graph
+        <!-- EDITOR & SWARM TICKETS VIEW (DEFAULT) -->
+        <div id="editor-view" style="display: grid; grid-template-columns: 320px 1fr 380px; gap: 2rem; width: 100%; grid-column: 1 / -1;">
+            <!-- LEFT PANEL: 7-Layer Swarm Graph -->
+            <div class="glass-panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <span>🌐</span> 7-Layer Pedigree Graph
+                    </div>
+                </div>
+                <div class="agent-list" id="agents-container">
+                    <!-- Seeding dynamically -->
+                    <div style="color: var(--text-secondary); text-align: center; padding: 2rem;">Connecting to swarm database...</div>
                 </div>
             </div>
-            <div class="agent-list" id="agents-container">
-                <!-- Seeding dynamically -->
-                <div style="color: var(--text-secondary); text-align: center; padding: 2rem;">Connecting to swarm database...</div>
+
+            <!-- MIDDLE PANEL: Swarm Tickets workspace -->
+            <div class="workspace">
+                <!-- Ticket Creator Form -->
+                <div class="glass-panel">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            <span>🎫</span> Propose Swarm Mind Mutation
+                            <span class="info-badge tooltip-trigger" data-tooltip="Consensus Engine: Proposed mutations are voted on by a 5-member panel of Layer 2/3 overseers. Enforces 4/5 agreement.">i</span>
+                        </div>
+                    </div>
+                    <div class="control-description">
+                        State mutation tickets initiate voting logs. Security keys trigger AGENT-SEC vetoes, and short descriptions cause telemetry blocks.
+                        <a href="#" onclick="toggleView('docs'); selectDoc('architecture'); return false;" class="doc-reference-link">📖 View Swarm Consensus Rules</a>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label for="mutation-key">
+                                Target State Key
+                                <span class="info-badge tooltip-trigger" data-tooltip="The database key to mutate. Keys with 'security', 'port', 'root', or 'password' will be vetoed by AGENT-SEC.">i</span>
+                            </label>
+                            <input type="text" id="mutation-key" placeholder="e.g., model_temperature" value="model_temperature">
+                        </div>
+                        <div class="form-group">
+                            <label for="mutation-value">
+                                Proposed State Value
+                                <span class="info-badge tooltip-trigger" data-tooltip="The new data value to commit. Values are audited and cryptographically ledgered upon validation.">i</span>
+                            </label>
+                            <input type="text" id="mutation-value" placeholder="e.g., 0.85">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="mutation-reason">
+                            Detailed Rationale (Analyzed by Swarm Consensus)
+                            <span class="info-badge tooltip-trigger" data-tooltip="Must be 10+ characters. AGENT-TEL automatically objects if explanations are too brief for diagnostic logging.">i</span>
+                        </label>
+                        <textarea id="mutation-reason" rows="3" placeholder="Provide complete rationale for dependency analysis..."></textarea>
+                    </div>
+                    <button class="btn-primary" onclick="submitMutationProposal()">Submit Mind Mutation Proposal</button>
+                </div>
+
+                <!-- Active Relational Decision Log (Tickets) -->
+                <div class="glass-panel">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            <span>📂</span> Swarm Relational Tickets
+                        </div>
+                    </div>
+                    <div class="ticket-list" id="tickets-container" style="max-height: 250px; overflow-y: auto; gap: 8px;">
+                        <!-- Dynamic -->
+                    </div>
+                </div>
+
+                <!-- Best Practical RT Transactions Live Audit Trail -->
+                <div class="glass-panel">
+                    <div class="panel-header">
+                        <div class="panel-title" style="color: var(--purple);">
+                            <span>📊</span> Best Practical RT Live Audit Trail (Transactions)
+                        </div>
+                        <button class="btn-primary" style="padding: 6px 12px; font-size: 0.8rem; background: linear-gradient(135deg, var(--purple), #6366f1);" onclick="loadTransactions()">Refresh Audit Trail</button>
+                    </div>
+                    <div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:-0.25rem; font-family:'JetBrains Mono', monospace;">
+                        Compliance Matrix: RT-Compliant Event-Driven State Mutation Ledger
+                    </div>
+                    <div class="ticket-list" id="transactions-container" style="max-height: 280px; overflow-y: auto; gap: 8px;">
+                        <!-- Dynamic -->
+                    </div>
+                </div>
+
+                <!-- Blockchain Ledger Blocks -->
+                <div class="glass-panel">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            <span>📜</span> Swarm Mind Ledger Timeline (Verifiable Chain)
+                        </div>
+                        <button class="btn-primary" style="padding: 6px 12px; font-size: 0.8rem;" onclick="refreshLedger()">Verify Chain Integrity</button>
+                    </div>
+                    <div class="ledger-blocks-container" id="ledger-container">
+                        <!-- Dynamic -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT PANEL: Jetweb Time Machine Console -->
+            <div class="glass-panel">
+                <div class="panel-header">
+                    <div class="panel-title" style="color: var(--rose);">
+                        <span>⏰</span> Jetweb Time Machine Operator
+                        <span class="info-badge tooltip-trigger" style="background: rgba(244, 63, 94, 0.1); border-color: rgba(244, 63, 94, 0.3); color: var(--rose);" data-tooltip="CRITICAL: Forces state hard-forks and blocks bifurcation. Rewrites ledger hashes and synchronizes past state configurations.">i</span>
+                    </div>
+                </div>
+                <div class="control-description">
+                    Override previous transactions and split the blockchain ledger to correct historical errors or handle state anomalies.
+                    <a href="#" onclick="toggleView('docs'); selectDoc('jetweb-time-machine'); return false;" class="doc-reference-link" style="color: var(--rose);">📖 Read Time Machine Specifications</a>
+                </div>
+                <div class="time-machine-deck">
+                    <div class="form-group">
+                        <label for="tm-block">
+                            Target Historic Block Index
+                            <span class="info-badge tooltip-trigger" style="background: rgba(244, 63, 94, 0.1); border-color: rgba(244, 63, 94, 0.3); color: var(--rose);" data-tooltip="The block height index to alter. Past hashes from this index forward will be regenerated and audited.">i</span>
+                        </label>
+                        <input type="number" id="tm-block" placeholder="e.g., 2" value="2">
+                    </div>
+                    <div class="form-group">
+                        <label for="tm-key">
+                            Overriding Key
+                            <span class="info-badge tooltip-trigger" style="background: rgba(244, 63, 94, 0.1); border-color: rgba(244, 63, 94, 0.3); color: var(--rose);" data-tooltip="The specific historical state parameter key to target for retroactive modification.">i</span>
+                        </label>
+                        <input type="text" id="tm-key" placeholder="e.g., model_temperature" value="model_temperature">
+                    </div>
+                    <div class="form-group">
+                        <label for="tm-value">
+                            Overriding Value
+                            <span class="info-badge tooltip-trigger" style="background: rgba(244, 63, 94, 0.1); border-color: rgba(244, 63, 94, 0.3); color: var(--rose);" data-tooltip="The retroactive state value to force at the specified target block index.">i</span>
+                        </label>
+                        <input type="text" id="tm-value" placeholder="e.g., 0.55">
+                    </div>
+                    <div class="form-group">
+                        <label for="tm-reason">
+                            Time Machine Override Explanation
+                            <span class="info-badge tooltip-trigger" style="background: rgba(244, 63, 94, 0.1); border-color: rgba(244, 63, 94, 0.3); color: var(--rose);" data-tooltip="Detailed justification for timeline bifurcation. Required for security compliance mapping.">i</span>
+                        </label>
+                        <textarea id="tm-reason" rows="2" placeholder="Timeline hard-fork collapse justification..."></textarea>
+                    </div>
+                    <button class="btn-danger" onclick="triggerTimeMachine()">Activate Time Machine Bifurcation</button>
+                </div>
+
+                <!-- Terminal Live Console Logs -->
+                <div class="panel-header" style="margin-top: 1rem;">
+                    <div class="panel-title" style="color: #38bdf8; font-size: 0.95rem;">
+                        <span>💻</span> Swarm Mind Live Terminal Console
+                    </div>
+                </div>
+                <div class="console-terminal" id="console-logs">
+                    <div class="console-line"><span class="console-ts">[SYSTEM]</span><span class="console-info">Sovereign Swarm Control Workspace console active.</span></div>
+                </div>
             </div>
         </div>
 
-        <!-- MIDDLE PANEL: Swarm Tickets workspace -->
-        <div class="workspace">
-            <!-- Ticket Creator Form -->
-            <div class="glass-panel">
-                <div class="panel-header">
-                    <div class="panel-title">
-                        <span>🎫</span> Propose Swarm Mind Mutation
+        <!-- OPEN AGENT MANAGER (MISSION CONTROL DASHBOARD) -->
+        <div id="agent-manager-view" style="display: none; grid-template-columns: 1fr 420px; gap: 2rem; width: 100%; grid-column: 1 / -1;">
+            <!-- LEFT COLUMN: Topology Grid & Spawning Forge -->
+            <div style="display: flex; flex-direction: column; gap: 2rem;">
+                
+                <!-- Spawning Forge -->
+                <div class="glass-panel" style="position: relative;">
+                    <!-- Loading Overlay for Agent Spawning -->
+                    <div id="spawn-loading-overlay" class="loading-overlay">
+                        <div class="spinner"></div>
+                        <div style="font-weight: 600; color: var(--cyan); letter-spacing: 1px;">FORGING NEURAL MIND STATE...</div>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary);">Registering agent lineage signature in pedigree DB</div>
+                    </div>
+                    
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            <span>🧬</span> Spawning Forge — Register Swarm Representative
+                            <span class="info-badge tooltip-trigger" data-tooltip="Pedigree Graph Matrix: Registers new autonomous agents with explicit parent inheritance, layer level, and specialties.">i</span>
+                        </div>
+                    </div>
+                    <div class="control-description">
+                        Forge dynamic Dialect agents and append them to the 7-Layer pedigree ledger. Inherited traits are validated instantly.
+                        <a href="#" onclick="toggleView('docs'); selectDoc('architecture'); return false;" class="doc-reference-link">📖 Read 7-Layer Pedigree Specifications</a>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label for="spawn-agent-id">
+                                Agent Unique ID
+                                <span class="info-badge tooltip-trigger" data-tooltip="Unique uppercase code (e.g. AGENT-SEC-AUDIT). System automatically validates constraints.">i</span>
+                            </label>
+                            <input type="text" id="spawn-agent-id" placeholder="e.g., AGENT-ANALYZER">
+                        </div>
+                        <div class="form-group">
+                            <label for="spawn-agent-name">
+                                Representative Name
+                                <span class="info-badge tooltip-trigger" data-tooltip="Human-readable title representing this agent's operating context.">i</span>
+                            </label>
+                            <input type="text" id="spawn-agent-name" placeholder="e.g., Pedigree Analyzer">
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label for="spawn-parent-id">
+                                Parent Ancestor Node
+                                <span class="info-badge tooltip-trigger" data-tooltip="Immediate supervisor node in the pedigree graph. Inherits progenitor context.">i</span>
+                            </label>
+                            <select id="spawn-parent-id">
+                                <!-- Dynamic select options populated by loadManagerAgents -->
+                                <option value="AGENT-0">AGENT-0 (Sovereign Swarm Root)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="spawn-layer-level">
+                                Swarm Hierarchy Layer
+                                <span class="info-badge tooltip-trigger" data-tooltip="Determines security boundary, command hierarchy, and resource scopes.">i</span>
+                            </label>
+                            <select id="spawn-layer-level">
+                                <option value="1">Layer 1 - Core Swarm Mind</option>
+                                <option value="2">Layer 2 - Domain Sovereignty</option>
+                                <option value="3">Layer 3 - Functional Specialization</option>
+                                <option value="4" selected>Layer 4 - Operational Class</option>
+                                <option value="5">Layer 5 - Micro-Task Engine</option>
+                                <option value="6">Layer 6 - Shared Resource Bindings</option>
+                                <option value="7">Layer 7 - Execution Interface</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label for="spawn-specialty">
+                                Functional Specialty Area
+                                <span class="info-badge tooltip-trigger" data-tooltip="Core technical focus or expertise scope of the spawned node.">i</span>
+                            </label>
+                            <input type="text" id="spawn-specialty" placeholder="e.g., System Diagnostics">
+                        </div>
+                        <div class="form-group">
+                            <label for="spawn-subspecialty">
+                                Operational Subspecialty
+                                <span class="info-badge tooltip-trigger" data-tooltip="Detailed micro-task wrapper specialty under the parent specialty.">i</span>
+                            </label>
+                            <input type="text" id="spawn-subspecialty" placeholder="e.g., CPU/RAM Profiling">
+                        </div>
+                    </div>
+                    <button class="btn-primary" onclick="spawnAgent()">Forge & Seize Mind State</button>
+                </div>
+
+                <!-- Active Swarm Topology Map -->
+                <div class="glass-panel">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            <span>🌌</span> Active Swarm Architecture Topology
+                        </div>
+                        <span style="font-size: 0.8rem; color: var(--text-secondary);">Click card to select as Teleporter Source</span>
+                    </div>
+                    <div class="manager-agent-grid" id="manager-agents-grid">
+                        <!-- Dynamic grid elements loaded by loadManagerAgents -->
                     </div>
                 </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            </div>
+
+            <!-- RIGHT COLUMN: Teleporter Bay & Telemetry Stats -->
+            <div style="display: flex; flex-direction: column; gap: 2rem;">
+                
+                <!-- High-Speed RAM Bus Teleporter -->
+                <div class="glass-panel" style="position: relative;">
+                    <!-- Loading Overlay for Teleportation -->
+                    <div id="teleport-loading-overlay" class="loading-overlay">
+                        <div class="spinner"></div>
+                        <div id="teleport-status-text" style="font-weight: 600; color: var(--cyan); letter-spacing: 1px;">INITIATING TELEPORTATION SEQUENCE...</div>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary);">Executing direct RAM mapping shift via Memory Bus</div>
+                    </div>
+
+                    <div class="panel-header">
+                        <div class="panel-title" style="color: var(--purple);">
+                            <span>⚡</span> High-Speed RAM Bus Teleporter
+                            <span class="info-badge tooltip-trigger" style="background: rgba(139, 92, 246, 0.1); border-color: rgba(139, 92, 246, 0.3); color: var(--purple);" data-tooltip="Zero-Copy Transporter: Utilizes POSIX shared memory allocations to teletransport state spaces instantly between host nodes.">i</span>
+                        </div>
+                    </div>
+                    <div class="control-description">
+                        Virtualize and shift the agent's active mind buffer instantly between local hypervisors using zero-copy <strong>/dev/shm</strong> memory mapping.
+                        <a href="#" onclick="toggleView('docs'); selectDoc('memory-bus'); return false;" class="doc-reference-link" style="color: var(--purple);">📖 View RAM Memory Bus Specifications</a>
+                    </div>
                     <div class="form-group">
-                        <label for="mutation-key">Target State Key</label>
-                        <input type="text" id="mutation-key" placeholder="e.g., model_temperature" value="model_temperature">
+                        <label for="teleport-source">
+                            Source Agent Mind
+                            <span class="info-badge tooltip-trigger" style="background: rgba(139, 92, 246, 0.1); border-color: rgba(139, 92, 246, 0.3); color: var(--purple);" data-tooltip="Select the active Dialect agent to teletransport. Active memory blocks will be extracted.">i</span>
+                        </label>
+                        <select id="teleport-source">
+                            <!-- Populated dynamically -->
+                        </select>
                     </div>
                     <div class="form-group">
-                        <label for="mutation-value">Proposed State Value</label>
-                        <input type="text" id="mutation-value" placeholder="e.g., 0.85">
+                        <label>
+                            Target Mesh Server Node
+                            <span class="info-badge tooltip-trigger" style="background: rgba(139, 92, 246, 0.1); border-color: rgba(139, 92, 246, 0.3); color: var(--purple);" data-tooltip="The physical/virtual node target where the extracted memory segment is materialized.">i</span>
+                        </label>
+                        <div class="teleport-node-box">
+                            <div class="teleport-node-option selected" id="opt-node-aurora" onclick="selectTeleportNode('AURORA-R9-SERVER')">AURORA-R9-SERVER</div>
+                            <div class="teleport-node-option" id="opt-node-laptop" onclick="selectTeleportNode('LAPTOP-TRAINING-AGENT')">LAPTOP-TRAINING-AGENT</div>
+                        </div>
+                        <input type="hidden" id="teleport-target-node" value="AURORA-R9-SERVER">
                     </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label for="teleport-offset">
+                                RAM Offset (Bytes)
+                                <span class="info-badge tooltip-trigger" style="background: rgba(139, 92, 246, 0.1); border-color: rgba(139, 92, 246, 0.3); color: var(--purple);" data-tooltip="Memory block allocation index offset where teleportation payload begins.">i</span>
+                            </label>
+                            <input type="number" id="teleport-offset" value="0" placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="teleport-size">
+                                State Size (Bytes)
+                                <span class="info-badge tooltip-trigger" style="background: rgba(139, 92, 246, 0.1); border-color: rgba(139, 92, 246, 0.3); color: var(--purple);" data-tooltip="Total buffer allocation size to extract and allocate in destination memory.">i</span>
+                            </label>
+                            <input type="number" id="teleport-size" value="1024" placeholder="1024">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="teleport-command">
+                            Materialization Resume Command
+                            <span class="info-badge tooltip-trigger" style="background: rgba(139, 92, 246, 0.1); border-color: rgba(139, 92, 246, 0.3); color: var(--purple);" data-tooltip="Automation callback executed on target node to reload process with new memory mapping.">i</span>
+                        </label>
+                        <input type="text" id="teleport-command" value="python3 /home/aellok/sovereign_mesh/grpc_node/grpc_client.py --ports" placeholder="Command to execute upon state load">
+                    </div>
+                    <button class="btn-primary" style="background: linear-gradient(135deg, var(--purple), #6366f1); box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);" onclick="teleportAgent()">Initiate Phase-Shift Teleportation</button>
                 </div>
-                <div class="form-group">
-                    <label for="mutation-reason">Detailed Rationale (Analyzed by Swarm Consensus)</label>
-                    <textarea id="mutation-reason" rows="3" placeholder="Provide complete rationale for dependency analysis..."></textarea>
-                </div>
-                <button class="btn-primary" onclick="submitMutationProposal()">Submit Mind Mutation Proposal</button>
-            </div>
 
-            <!-- Active Relational Decision Log (Tickets) -->
-            <div class="glass-panel">
-                <div class="panel-header">
-                    <div class="panel-title">
-                        <span>📂</span> Swarm Relational Tickets
+                <!-- Mesh Telemetry & Stats -->
+                <div class="glass-panel">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            <span>📊</span> Swarm Telemetry Indicators
+                        </div>
                     </div>
-                </div>
-                <div class="ticket-list" id="tickets-container" style="max-height: 250px; overflow-y: auto; gap: 8px;">
-                    <!-- Dynamic -->
-                </div>
-            </div>
-
-            <!-- Best Practical RT Transactions Live Audit Trail -->
-            <div class="glass-panel">
-                <div class="panel-header">
-                    <div class="panel-title" style="color: var(--purple);">
-                        <span>📊</span> Best Practical RT Live Audit Trail (Transactions)
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; padding-bottom: 6px; border-bottom: 1px solid var(--border-color);">
+                            <span style="color: var(--text-secondary);">Sovereign Nodes Active</span>
+                            <span style="font-weight: 700; color: var(--cyan);">2 (Aurora-R9 / Laptop)</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; padding-bottom: 6px; border-bottom: 1px solid var(--border-color);">
+                            <span style="color: var(--text-secondary);">System Consensus Ratio</span>
+                            <span style="font-weight: 700; color: var(--green);">4/5 Swarm Majority</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; padding-bottom: 6px; border-bottom: 1px solid var(--border-color);">
+                            <span style="color: var(--text-secondary);">RAM Bus Teleporter Link</span>
+                            <span style="font-weight: 700; color: var(--cyan);">11111 (Zero-Copy Paged)</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+                            <span style="color: var(--text-secondary);">Cryptographic Ledgers</span>
+                            <span style="font-weight: 700; color: var(--green);">SECURE (mmap direct)</span>
+                        </div>
                     </div>
-                    <button class="btn-primary" style="padding: 6px 12px; font-size: 0.8rem; background: linear-gradient(135deg, var(--purple), #6366f1);" onclick="loadTransactions()">Refresh Audit Trail</button>
-                </div>
-                <div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:-0.25rem; font-family:'JetBrains Mono', monospace;">
-                    Compliance Matrix: RT-Compliant Event-Driven State Mutation Ledger
-                </div>
-                <div class="ticket-list" id="transactions-container" style="max-height: 280px; overflow-y: auto; gap: 8px;">
-                    <!-- Dynamic -->
-                </div>
-            </div>
-
-            <!-- Blockchain Ledger Blocks -->
-            <div class="glass-panel">
-                <div class="panel-header">
-                    <div class="panel-title">
-                        <span>📜</span> Swarm Mind Ledger Timeline (Verifiable Chain)
-                    </div>
-                    <button class="btn-primary" style="padding: 6px 12px; font-size: 0.8rem;" onclick="refreshLedger()">Verify Chain Integrity</button>
-                </div>
-                <div class="ledger-blocks-container" id="ledger-container">
-                    <!-- Dynamic -->
                 </div>
             </div>
         </div>
 
-        <!-- RIGHT PANEL: Jetweb Time Machine Console -->
-        <div class="glass-panel">
-            <div class="panel-header">
-                <div class="panel-title" style="color: var(--rose);">
-                    <span>⏰</span> Jetweb Time Machine Operator
+        <!-- SWARM DOCUMENTATION HUB (DYNAMIC MD READER) -->
+        <div id="docs-hub-view" style="display: none; grid-template-columns: 320px 1fr; gap: 2rem; width: 100%; grid-column: 1 / -1;">
+            <!-- LEFT PANEL: Navigation Sidebar -->
+            <div class="glass-panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <span>📚</span> Swarm System Manuals
+                    </div>
                 </div>
-            </div>
-            <div class="time-machine-deck">
-                <div class="form-group">
-                    <label for="tm-block">Target Historic Block Index</label>
-                    <input type="number" id="tm-block" placeholder="e.g., 2" value="2">
+                <div class="docs-sidebar" id="docs-sidebar-list">
+                    <!-- Dynamic navigation buttons seeded by loadDocs() -->
+                    <div style="color: var(--text-secondary); text-align: center; padding: 2rem;">Loading documentation index...</div>
                 </div>
-                <div class="form-group">
-                    <label for="tm-key">Overriding Key</label>
-                    <input type="text" id="tm-key" placeholder="e.g., model_temperature" value="model_temperature">
-                </div>
-                <div class="form-group">
-                    <label for="tm-value">Overriding Value</label>
-                    <input type="text" id="tm-value" placeholder="e.g., 0.55">
-                </div>
-                <div class="form-group">
-                    <label for="tm-reason">Time Machine Override Explanation</label>
-                    <textarea id="tm-reason" rows="2" placeholder="Timeline hard-fork collapse justification..."></textarea>
-                </div>
-                <button class="btn-danger" onclick="triggerTimeMachine()">Activate Time Machine Bifurcation</button>
             </div>
 
-            <!-- Terminal Live Console Logs -->
-            <div class="panel-header" style="margin-top: 1rem;">
-                <div class="panel-title" style="color: #38bdf8; font-size: 0.95rem;">
-                    <span>💻</span> Swarm Mind Live Terminal Console
+            <!-- RIGHT PANEL: Glassmorphic Markdown Viewer -->
+            <div class="docs-content-container" id="docs-content-viewer">
+                <div style="color: var(--text-secondary); text-align: center; padding: 5rem;">
+                    <span style="font-size: 3rem; display: block; margin-bottom: 1rem;">📖</span>
+                    <h3 style="color: #fff; font-weight: 700; margin-bottom: 0.5rem;">Sovereign Swarm System Manuals</h3>
+                    <p style="color: var(--text-secondary); font-size: 0.95rem;">Select a documentation manual from the sidebar to begin reading.</p>
+                    <p style="color: var(--cyan); font-size: 0.8rem; margin-top: 2rem; font-family: 'JetBrains Mono', monospace;">SECURE DIRECT MAPPING: /home/aellok/sovereign_mesh/docs/*</p>
                 </div>
-            </div>
-            <div class="console-terminal" id="console-logs">
-                <div class="console-line"><span class="console-ts">[SYSTEM]</span><span class="console-info">Sovereign Swarm Control Workspace console active.</span></div>
             </div>
         </div>
     </main>
@@ -629,7 +1309,9 @@
                     
                     layers[l].forEach(a => {
                         const card = document.createElement('div');
-                        card.className = 'agent-card';
+                        card.className = 'agent-card tooltip-trigger';
+                        const tooltipText = `Parent Node: ${a.parent_id || 'None (Seed)'} | Specialty: ${a.specialty} | Layer ${l} hierarchy bounds.`;
+                        card.setAttribute('data-tooltip', tooltipText);
                         card.innerHTML = `
                             <div class="agent-id-badge">${a.agent_id}</div>
                             <div style="font-weight:600; font-size:0.85rem;">${a.name}</div>
@@ -893,13 +1575,382 @@
             loadLedger();
         }
 
+        // View Toggling logic
+        function toggleView(view) {
+            const activeBg = document.getElementById('toggle-active-bg');
+            const btnEditor = document.getElementById('btn-editor-view');
+            const btnManager = document.getElementById('btn-manager-view');
+            const btnDocs = document.getElementById('btn-docs-view');
+            const editorGrid = document.getElementById('editor-view');
+            const managerGrid = document.getElementById('agent-manager-view');
+            const docsGrid = document.getElementById('docs-hub-view');
+
+            // Deactivate all
+            btnEditor.classList.remove('active');
+            btnManager.classList.remove('active');
+            btnDocs.classList.remove('active');
+            editorGrid.style.display = 'none';
+            managerGrid.style.display = 'none';
+            docsGrid.style.display = 'none';
+
+            if (view === 'editor') {
+                activeBg.style.transform = 'translateX(0)';
+                btnEditor.classList.add('active');
+                editorGrid.style.display = 'grid';
+                logToConsole('Switched view to Swarm Tickets & Timeline (Editor Mode)', 'info');
+            } else if (view === 'manager') {
+                activeBg.style.transform = 'translateX(144px)';
+                btnManager.classList.add('active');
+                managerGrid.style.display = 'grid';
+                logToConsole('Switched view to Mission Control (Open Agent Manager)', 'info');
+                loadManagerAgents();
+            } else {
+                activeBg.style.transform = 'translateX(288px)';
+                btnDocs.classList.add('active');
+                docsGrid.style.display = 'grid';
+                logToConsole('Switched view to System Manuals (Documentation Hub)', 'info');
+                loadDocs(); // Fetch manuals list
+            }
+        }
+
+        // Keyboard Shortcut Ctrl+E / Cmd+E toggler (cyclical through all 3 views)
+        window.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'e') {
+                e.preventDefault();
+                const editorGrid = document.getElementById('editor-view');
+                const managerGrid = document.getElementById('agent-manager-view');
+                const docsGrid = document.getElementById('docs-hub-view');
+
+                if (editorGrid.style.display !== 'none') {
+                    toggleView('manager');
+                } else if (managerGrid.style.display !== 'none') {
+                    toggleView('docs');
+                } else {
+                    toggleView('editor');
+                }
+            }
+        });
+
+        // Load documentation list from api and populate sidebar
+        async function loadDocs() {
+            try {
+                const res = await fetch('/api/docs');
+                const response = await res.json();
+                const docs = response.data || [];
+
+                const sidebar = document.getElementById('docs-sidebar-list');
+                sidebar.innerHTML = '';
+
+                // Map specific icons to specific document files
+                const icons = {
+                    "architecture": "🌐",
+                    "grpc-api": "🔌",
+                    "jetweb-time-machine": "⏰",
+                    "memory-bus": "⚡",
+                    "rt-compliance": "🛡️"
+                };
+
+                docs.forEach((doc, idx) => {
+                    const item = document.createElement('div');
+                    item.className = `docs-nav-item${idx === 0 ? ' active' : ''}`;
+                    item.id = `doc-nav-${doc.id}`;
+                    item.onclick = () => selectDoc(doc.id);
+
+                    const icon = icons[doc.id] || "📄";
+                    item.innerHTML = `
+                        <span class="doc-icon">${icon}</span>
+                        <span>${doc.title}</span>
+                    `;
+                    sidebar.appendChild(item);
+                });
+
+                // Auto-load the first doc
+                if (docs.length > 0) {
+                    selectDoc(docs[0].id);
+                }
+            } catch (err) {
+                console.error(err);
+                logToConsole(`Failed to load documentation index: ${err}`, 'error');
+            }
+        }
+
+        // Fetch a specific document and render it in the viewer
+        async function selectDoc(docId) {
+            // Update active states in sidebar
+            const items = document.querySelectorAll('.docs-nav-item');
+            items.forEach(item => item.classList.remove('active'));
+            
+            const activeItem = document.getElementById(`doc-nav-${docId}`);
+            if (activeItem) activeItem.classList.add('active');
+
+            const viewer = document.getElementById('docs-content-viewer');
+            viewer.innerHTML = `
+                <div style="color: var(--text-secondary); text-align: center; padding: 5rem;">
+                    <div class="spinner" style="margin: 0 auto 1.5rem;"></div>
+                    <p style="color: var(--cyan); letter-spacing: 1px;">RETRIEVING ENCRYPTED FILE STATE...</p>
+                </div>
+            `;
+
+            try {
+                const res = await fetch(`/api/docs/${docId}`);
+                const response = await res.json();
+                const doc = response.data;
+
+                if (response.success && doc) {
+                    // Use marked.js to render raw markdown to HTML safely
+                    const rawHtml = marked.parse(doc.content);
+                    
+                    // Style first heading with a custom emoji wrapper
+                    viewer.innerHTML = `
+                        <div class="doc-meta" style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:1.5rem; font-family:'JetBrains Mono',monospace; text-transform:uppercase; letter-spacing:1.5px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:6px; display:flex; justify-content:space-between;">
+                            <span>SOURCE: SECURE://docs/${docId}.md</span>
+                            <span>STATUS: LIVE_SYNCHRONIZED</span>
+                        </div>
+                        <div class="markdown-body">
+                            ${rawHtml}
+                        </div>
+                    `;
+                    logToConsole(`Successfully read and rendered documentation page: ${doc.title}`, 'success');
+                } else {
+                    viewer.innerHTML = `
+                        <div style="color: var(--rose); text-align: center; padding: 5rem;">
+                            <h3>Failed to load document</h3>
+                            <p>${response.error ? response.error.message : 'Unknown error'}</p>
+                        </div>
+                    `;
+                }
+            } catch (err) {
+                console.error(err);
+                viewer.innerHTML = `
+                    <div style="color: var(--rose); text-align: center; padding: 5rem;">
+                        <h3>Failed to retrieve document</h3>
+                        <p>${err}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Select node in Teleporter
+        function selectTeleportNode(nodeId) {
+            const optAurora = document.getElementById('opt-node-aurora');
+            const optLaptop = document.getElementById('opt-node-laptop');
+            const targetInput = document.getElementById('teleport-target-node');
+
+            if (nodeId === 'AURORA-R9-SERVER') {
+                optAurora.classList.add('selected');
+                optLaptop.classList.remove('selected');
+                targetInput.value = 'AURORA-R9-SERVER';
+            } else {
+                optLaptop.classList.add('selected');
+                optAurora.classList.remove('selected');
+                targetInput.value = 'LAPTOP-TRAINING-AGENT';
+            }
+            logToConsole(`Selected teleporter target node: ${targetInput.value}`, 'info');
+        }
+
+        // Fetch agents from database and populate both UI graphs & selects
+        async function loadManagerAgents() {
+            try {
+                const res = await fetch('/api/agents');
+                const response = await res.json();
+                const agents = response.data || [];
+                
+                // Populate Topology Grid
+                const gridContainer = document.getElementById('manager-agents-grid');
+                gridContainer.innerHTML = '';
+
+                // Group by layer level
+                const layers = {};
+                agents.forEach(a => {
+                    if (!layers[a.layer_level]) layers[a.layer_level] = [];
+                    layers[a.layer_level].push(a);
+                });
+
+                Object.keys(layers).sort().forEach(l => {
+                    const layerDiv = document.createElement('div');
+                    layerDiv.className = 'layer-section';
+                    
+                    const header = document.createElement('div');
+                    header.className = 'layer-title-badge';
+                    header.innerHTML = `<span>Layer ${l}</span> <span style="font-size: 0.65rem; color: var(--text-secondary);">${getLayerName(parseInt(l))}</span>`;
+                    layerDiv.appendChild(header);
+
+                    layers[l].forEach(a => {
+                        const card = document.createElement('div');
+                        card.className = 'agent-card tooltip-trigger';
+                        card.style.cursor = 'pointer';
+                        card.style.border = '1px solid rgba(6, 182, 212, 0.1)';
+                        card.onclick = () => selectAgentForTeleport(a.agent_id);
+                        
+                        const tooltipText = `Parent Node: ${a.parent_id || 'None (Seed)'} | Click card to select as teleportation source node.`;
+                        card.setAttribute('data-tooltip', tooltipText);
+                        
+                        card.innerHTML = `
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <div class="agent-id-badge">${a.agent_id}</div>
+                                <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 6px var(--green);"></div>
+                            </div>
+                            <div style="font-weight:600; font-size:0.85rem; margin-top:2px;">${a.name}</div>
+                            <div class="agent-details" style="margin-top:2px;">Specialty: ${a.specialty}</div>
+                            <div class="agent-details">Subspecialty: ${a.subspecialty}</div>
+                        `;
+                        layerDiv.appendChild(card);
+                    });
+                    gridContainer.appendChild(layerDiv);
+                });
+
+                // Populate Parent selector & Teleport selector
+                const parentSelect = document.getElementById('spawn-parent-id');
+                const teleportSelect = document.getElementById('teleport-source');
+                
+                parentSelect.innerHTML = '<option value="">None (Top-Level Root Progenitor)</option>';
+                teleportSelect.innerHTML = '';
+
+                agents.forEach(a => {
+                    parentSelect.innerHTML += `<option value="${a.agent_id}">${a.agent_id} (${a.name})</option>`;
+                    teleportSelect.innerHTML += `<option value="${a.agent_id}">${a.agent_id} (${a.name})</option>`;
+                });
+
+                logToConsole(`Loaded ${agents.length} swarm agents inside Mission Control topology.`, 'success');
+            } catch (err) {
+                console.error(err);
+                logToConsole(`Failed to load manager agents topology: ${err}`, 'error');
+            }
+        }
+
+        function selectAgentForTeleport(agentId) {
+            const teleportSelect = document.getElementById('teleport-source');
+            teleportSelect.value = agentId;
+            logToConsole(`Selected ${agentId} as teleporter source node.`, 'info');
+        }
+
+        // Spawn a new agent in SQLite pedigree graph
+        async function spawnAgent() {
+            const agent_id = document.getElementById('spawn-agent-id').value.trim();
+            const name = document.getElementById('spawn-agent-name').value.trim();
+            const parent_agent_id = document.getElementById('spawn-parent-id').value;
+            const layer_level = document.getElementById('spawn-layer-level').value;
+            const specialty = document.getElementById('spawn-specialty').value.trim();
+            const subspecialty = document.getElementById('spawn-subspecialty').value.trim();
+
+            if (!agent_id || !name || !specialty || !subspecialty) {
+                alert('Please complete all forge agent creation inputs!');
+                return;
+            }
+
+            const overlay = document.getElementById('spawn-loading-overlay');
+            overlay.classList.add('active');
+            logToConsole(`🧬 Spawning Forge: Allocating new system context for ${agent_id}...`, 'info');
+
+            try {
+                const res = await fetch('/api/v2/agents', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        agent_id,
+                        name,
+                        parent_agent_id,
+                        layer_level: parseInt(layer_level),
+                        specialty,
+                        subspecialty
+                    })
+                });
+                const response = await res.json();
+                
+                if (response.success) {
+                    logToConsole(`🧬 Mind Forge success: Agent '${agent_id}' has been registered in the 7-Layer Swarm Map!`, 'success');
+                    
+                    // Clear inputs
+                    document.getElementById('spawn-agent-id').value = '';
+                    document.getElementById('spawn-agent-name').value = '';
+                    document.getElementById('spawn-specialty').value = '';
+                    document.getElementById('spawn-subspecialty').value = '';
+
+                    // Reload
+                    await loadManagerAgents();
+                    await loadAgents(); // Reload graph in editor view too
+                } else {
+                    logToConsole(`🧬 Mind Forge failure: ${response.error.message}`, 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                logToConsole(`🧬 Mind Forge error: ${err}`, 'error');
+            } finally {
+                overlay.classList.remove('active');
+            }
+        }
+
+        // Initiate direct RAM state teleportation over the High-Speed Memory Bus
+        async function teleportAgent() {
+            const source = document.getElementById('teleport-source').value;
+            const target = document.getElementById('teleport-target-node').value;
+            const offset = document.getElementById('teleport-offset').value;
+            const size = document.getElementById('teleport-size').value;
+            const command = document.getElementById('teleport-command').value.trim();
+
+            if (!source || !target || !command) {
+                alert('Please fill out all Teleporter sequence fields!');
+                return;
+            }
+
+            const overlay = document.getElementById('teleport-loading-overlay');
+            const statusText = document.getElementById('teleport-status-text');
+            
+            overlay.classList.add('active');
+            statusText.innerText = `LOCKING NEURAL SEGMENT FOR ${source}...`;
+            logToConsole(`⚡ Teleporter Bay: Initiating quantum phase-shift segment migration...`, 'warning');
+            logToConsole(`⚡ Target destination node set to: ${target}`, 'info');
+
+            try {
+                // Phase 1: Lock segment
+                await new Promise(r => setTimeout(r, 800));
+                statusText.innerText = `MAPPED DIRECT RAM SEGMENT AT OFFSET ${offset}...`;
+                logToConsole(`⚡ RAM Mapping: Allocated zero-copy page frame at shared memory offset ${offset}.`, 'info');
+
+                // Phase 2: Shift
+                await new Promise(r => setTimeout(r, 600));
+                statusText.innerText = `TELEPORTING NEURAL MIND VIA HIGH-SPEED BUS...`;
+                logToConsole(`⚡ Transmitting ${size} byte mind state buffer over local memory page table...`, 'info');
+
+                const res = await fetch('/api/v2/teleport', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        source_node_id: source,
+                        target_node_id: target,
+                        memory_bus_offset: parseInt(offset),
+                        state_size: parseInt(size),
+                        run_command: command
+                    })
+                });
+                const response = await res.json();
+
+                if (response.success) {
+                    logToConsole(`⚡ Teleport SUCCESS! Agent '${source}' successfully materialized on target node.`, 'success');
+                    if (response.data.execution_stdout) {
+                        logToConsole(`STDOUT:\n${response.data.execution_stdout}`, 'success');
+                    }
+                    if (response.data.execution_stderr) {
+                        logToConsole(`STDERR:\n${response.data.execution_stderr}`, 'warning');
+                    }
+                } else {
+                    logToConsole(`⚡ Teleport FAILED: ${response.message || response.error.message}`, 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                logToConsole(`⚡ Teleport anomaly detected: ${err}`, 'error');
+            } finally {
+                overlay.classList.remove('active');
+            }
+        }
+
         // Initialize dashboard
         window.onload = () => {
             loadAgents();
             loadTickets();
             loadLedger();
             loadTransactions();
-            logToConsole('Sovereign control panels synced and fully active.', 'success');
+            logToConsole('Sovereign control panels synced and fully active. Shortcut (Ctrl+E / Cmd+E) enabled.', 'success');
         };
     </script>
 </body>

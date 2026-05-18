@@ -19,7 +19,8 @@ $GitInstalled = $false
 try {
     $null = Get-Command git -ErrorAction Stop
     $GitInstalled = $true
-} catch {}
+}
+catch {}
 
 if (-not $GitInstalled) {
     Write-Host "[WSL DETECTED] 'git' is not found in Windows PATH." -ForegroundColor Yellow
@@ -59,7 +60,8 @@ $GH_Installed = $false
 try {
     $null = Get-Command gh -ErrorAction Stop
     $GH_Installed = $true
-} catch {}
+}
+catch {}
 
 if ($GH_Installed) {
     Write-Host "[DETECTED] GitHub CLI (gh.exe) is installed on your Windows host!" -ForegroundColor Green
@@ -74,7 +76,8 @@ if ($GH_Installed) {
             Write-Host "[SUCCESS] Repository created and pushed successfully under your account!" -ForegroundColor Green
             Write-Host "Visit: https://github.com/$TargetOrg/$TargetRepo" -ForegroundColor Green
             Exit
-        } else {
+        }
+        else {
             Write-Host "[WARNING] Automated CLI creation failed or returned an error." -ForegroundColor Yellow
             Write-Host "Falling back to standard manual push method..." -ForegroundColor Yellow
         }
@@ -94,7 +97,8 @@ $ProtoChoice = Read-Host "Select Protocol Option (1 or 2)"
 if ($ProtoChoice -eq '2') {
     $TargetRemote = $RemoteUrlSsh
     Write-Host "[SYSTEM] Using SSH protocol: $TargetRemote" -ForegroundColor Cyan
-} else {
+}
+else {
     $TargetRemote = $RemoteUrlHttps
     Write-Host "[SYSTEM] Using HTTPS protocol: $TargetRemote" -ForegroundColor Cyan
 }
@@ -104,7 +108,8 @@ $ExistingRemote = git remote get-url origin 2>$null
 if ($ExistingRemote) {
     Write-Host "[SYSTEM] Updating existing remote origin to: $TargetRemote" -ForegroundColor Yellow
     git remote set-url origin $TargetRemote
-} else {
+}
+else {
     Write-Host "[SYSTEM] Registering remote origin to: $TargetRemote" -ForegroundColor Yellow
     git remote add origin $TargetRemote
 }
@@ -130,9 +135,11 @@ if ($Confirm -eq 'Y' -or $Confirm -eq 'y') {
     if ($LASTEXITCODE -eq 0) {
         Write-Host "[SUCCESS] Sovereign Swarm Mesh is live on GitHub!" -ForegroundColor Green
         Write-Host "Visit: https://github.com/$TargetOrg/$TargetRepo" -ForegroundColor Green
-    } else {
+    }
+    else {
         Write-Host "[ERROR] Git push failed. Verify your network or credentials." -ForegroundColor Red
     }
-} else {
+}
+else {
     Write-Host "[ABORTED] Please run this script again once the repository is created." -ForegroundColor Yellow
 }
