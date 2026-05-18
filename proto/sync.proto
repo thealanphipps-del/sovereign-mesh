@@ -1,0 +1,288 @@
+syntax = "proto3";
+
+package sovereign;
+
+service AgentSync {
+    rpc Ping (PingRequest) returns (PingResponse);
+    rpc SyncState (StatePayload) returns (SyncAck);
+    rpc StreamInference (InferenceRequest) returns (stream InferenceChunk);
+    rpc RemoteExecute (CommandPayload) returns (CommandResult);
+
+    // User Maintenance & Synchronization RPCs
+    rpc CreateUser (CreateUserRequest) returns (UserResponse);
+    rpc ChangePassword (ChangePasswordRequest) returns (UserResponse);
+    rpc ManageGroup (ManageGroupRequest) returns (UserResponse);
+    rpc ListUsers (UserDirectoryRequest) returns (UserDirectoryResponse);
+    rpc SyncUsers (SyncUsersRequest) returns (UserResponse);
+
+    // Process & Port Monitoring RPCs
+    rpc GetProcessDirectory (ProcessDirectoryRequest) returns (ProcessDirectoryResponse);
+    rpc GetPortBindings (PortBindingsRequest) returns (PortBindingsResponse);
+
+    // High-Speed Agent Migration (Virtual Travel) RPC
+    rpc TeleportAgent (TeleportRequest) returns (TeleportResponse);
+
+    // Agent Pedigree & 7-Layer Swarm Cooperation RPC
+    rpc TracePedigree (PedigreeRequest) returns (PedigreeResponse);
+
+    // Agent Ticketing, Relational Memory, and Immutable Ledger RPCs
+    rpc ProposeSwarmMutation (MutationRequest) returns (MutationResponse);
+    rpc QuerySwarmLedger (LedgerQueryRequest) returns (LedgerQueryResponse);
+
+    // Jetweb Time Machine & Forensic Decision Accounting RPCs
+    rpc TimeTravelOverride (TimeTravelRequest) returns (TimeTravelResponse);
+    rpc ForensicAudit (ForensicRequest) returns (ForensicResponse);
+}
+
+message PingRequest {
+    string client_id = 1;
+    int64 timestamp = 2;
+}
+
+message PingResponse {
+    string server_id = 3;
+    int64 timestamp = 4;
+    string status = 5;
+}
+
+message StatePayload {
+    string agent_id = 1;
+    string active_model = 2;
+    map<string, string> metadata = 3;
+    repeated string available_models = 4;
+}
+
+message SyncAck {
+    bool success = 1;
+    string message = 2;
+    int64 sync_timestamp = 3;
+}
+
+message InferenceRequest {
+    string prompt = 1;
+    string model = 2;
+    float temperature = 3;
+}
+
+message InferenceChunk {
+    string token = 1;
+    bool done = 2;
+    int64 duration_ms = 3;
+}
+
+message CommandPayload {
+    string command = 1;
+    repeated string args = 2;
+}
+
+message CommandResult {
+    int32 exit_code = 1;
+    string stdout = 2;
+    string stderr = 3;
+}
+
+// User Maintenance Messages
+message CreateUserRequest {
+    string username = 1;
+    string password = 2;
+    int32 uid = 3;       // 0 for auto-assign, or explicit UID for sync
+    string group = 4;    // Primary group name or GID
+    bool create_home = 5;
+    string shell = 6;
+}
+
+message ChangePasswordRequest {
+    string username = 1;
+    string new_password = 2;
+}
+
+message ManageGroupRequest {
+    string username = 1;
+    string group_name = 2;
+    enum GroupAction {
+        ADD_TO_GROUP = 0;
+        REMOVE_FROM_GROUP = 1;
+        CREATE_GROUP = 2;
+    }
+    GroupAction action = 3;
+    int32 gid = 4;       // 0 for auto-assign, or explicit GID for sync
+}
+
+message UserInfo {
+    string username = 1;
+    int32 uid = 2;
+    int32 gid = 3;
+    string primary_group = 4;
+    repeated string groups = 5;
+    string home_dir = 6;
+    string shell = 7;
+}
+
+message SyncUsersRequest {
+    repeated UserInfo users = 1;
+}
+
+message UserResponse {
+    bool success = 1;
+    string message = 2;
+    repeated string details = 3;
+}
+
+message UserDirectoryRequest {
+    // Empty request payload for directory listing
+}
+
+message UserDirectoryResponse {
+    repeated UserInfo users = 1;
+}
+
+// Process and Port Monitoring Messages
+message ProcessInfo {
+    int32 pid = 1;
+    int32 ppid = 2;
+    string name = 3;
+    string username = 4;
+    double cpu_percent = 5;
+    double memory_percent = 6;
+    string cmdline = 7;
+    string status = 8;
+}
+
+message ProcessDirectoryRequest {
+    // Empty request payload
+}
+
+message ProcessDirectoryResponse {
+    repeated ProcessInfo processes = 1;
+}
+
+message PortBinding {
+    string protocol = 1;      // TCP or UDP
+    string local_address = 2;
+    int32 local_port = 3;
+    string remote_address = 4;
+    int32 remote_port = 5;
+    string state = 6;
+    int32 pid = 7;
+    string process_name = 8;
+}
+
+message PortBindingsRequest {
+    // Empty request payload
+}
+
+message PortBindingsResponse {
+    repeated PortBinding bindings = 1;
+}
+
+// High-Speed Agent Migration Messages
+message TeleportRequest {
+    string source_node_id = 1;
+    string target_node_id = 2;
+    int32 memory_bus_offset = 3;
+    int32 state_size = 4;
+    string run_command = 5;
+}
+
+message TeleportResponse {
+    bool success = 1;
+    string message = 2;
+    string execution_stdout = 3;
+    string execution_stderr = 4;
+}
+
+// Agent Pedigree Tracing Messages
+message PedigreeRequest {
+    string agent_id = 1;
+}
+
+message AgentAncestryNode {
+    string agent_id = 1;
+    string name = 2;
+    int32 layer_level = 3;
+    string specialty = 4;
+    string subspecialty = 5;
+}
+
+message PedigreeResponse {
+    repeated AgentAncestryNode pedigree_path = 1;
+    string collective_specialty_cooperation_map = 2;
+}
+
+// Agent Ticketing and Relational Memory Ledger Messages
+message MutationRequest {
+    string proposer_agent_id = 1;
+    string target_key = 2;
+    string proposed_value = 3;
+    string change_reason = 4;
+}
+
+message SwarmVote {
+    string agent_id = 1;
+    bool vote_agree = 2;
+    string rationale = 3;
+}
+
+message MutationResponse {
+    bool consensus_reached = 1;
+    string consensus_ratio = 2;
+    repeated SwarmVote votes = 3;
+    string minority_report = 4;
+    int32 block_index = 5;
+    string block_hash = 6;
+    string status = 7;
+}
+
+message LedgerBlock {
+    int32 block_index = 1;
+    string previous_hash = 2;
+    string timestamp = 3;
+    string agent_id = 4;
+    string mutation_payload = 5;
+    string consensus_votes = 6;
+    string minority_report = 7;
+    string block_hash = 8;
+}
+
+message LedgerQueryRequest {
+    // Empty request
+}
+
+message LedgerQueryResponse {
+    repeated LedgerBlock blocks = 1;
+    string chain_validation_status = 2;
+}
+
+// Jetweb Time Machine and Forensic Accounting Messages
+message TimeTravelRequest {
+    int32 target_block_index = 1;
+    string new_target_key = 2;
+    string new_proposed_value = 3;
+    string override_reason = 4;
+}
+
+message TimeTravelResponse {
+    bool success = 1;
+    string message = 2;
+    repeated string refactor_logs = 3;
+    string new_chain_validation_status = 4;
+}
+
+message ForensicRequest {
+    int32 target_block_index = 1;
+}
+
+message ForensicNode {
+    int32 block_index = 1;
+    string timestamp = 2;
+    string agent_id = 3;
+    string mutation_payload = 4;
+    string consensus_votes = 5;
+    string minority_report = 6;
+    string block_hash = 7;
+}
+
+message ForensicResponse {
+    repeated ForensicNode timeline_nodes = 1;
+    string master_knowledge_dump = 2;
+}

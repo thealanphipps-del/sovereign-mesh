@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Sovereign Mesh Database & Telemetry logs
+agent_pedigree.db
+*.log
+/tmp/
+sovereign_page_table
+/dev/shm/sovereign_page_table
+
+# Environments & OS files
+.venv
+venv/
+ENV/
+.env
+.env.local
+.DS_Store
+Thumbs.db
