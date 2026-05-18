@@ -607,9 +607,12 @@
         async function loadAgents() {
             try {
                 const res = await fetch('/api/agents');
-                const data = await res.json();
+                const response = await res.json();
                 const container = document.getElementById('agents-container');
                 container.innerHTML = '';
+                
+                // Read from REST 2.0 data array
+                const data = response.data || [];
                 
                 // Group by layer
                 const layers = {};
@@ -659,16 +662,18 @@
         async function loadTickets() {
             try {
                 const res = await fetch('/api/tickets');
-                const data = await res.json();
+                const response = await res.json();
                 const container = document.getElementById('tickets-container');
                 container.innerHTML = '';
                 
+                const data = response.data || [];
                 if (data.length === 0) {
                     container.innerHTML = `<div style="text-align:center; padding:1rem; color:var(--text-secondary); font-size:0.9rem;">No dynamic tickets created. Submit a proposal above!</div>`;
                     return;
                 }
                 
-                data.reverse().forEach(t => {
+                // Reverse to show latest first
+                [...data].reverse().forEach(t => {
                     const card = document.createElement('div');
                     card.className = `ticket-card ${t.status.toLowerCase().includes('reject') ? 'rejected' : t.status.toLowerCase().includes('commit') ? 'committed' : 'proposed'}`;
                     
@@ -697,10 +702,11 @@
         async function loadTransactions() {
             try {
                 const res = await fetch('/api/transactions');
-                const data = await res.json();
+                const response = await res.json();
                 const container = document.getElementById('transactions-container');
                 container.innerHTML = '';
                 
+                const data = response.data || [];
                 if (data.length === 0) {
                     container.innerHTML = `<div style="text-align:center; padding:1rem; color:var(--text-secondary); font-size:0.9rem;">No transactions logged in database.</div>`;
                     return;
@@ -748,15 +754,18 @@
         async function loadLedger() {
             try {
                 const res = await fetch('/api/ledger');
-                const data = await res.json();
+                const response = await res.json();
                 const container = document.getElementById('ledger-container');
                 container.innerHTML = '';
                 
-                const validationBadge = document.getElementById('validation-badge');
-                validationBadge.innerText = data.chain_validation_status;
-                validationBadge.style.color = data.chain_validation_status.includes('SECURE') ? 'var(--green)' : 'var(--rose)';
+                const data = response.data || [];
+                const meta = response.meta || {};
                 
-                data.blocks.forEach(b => {
+                const validationBadge = document.getElementById('validation-badge');
+                validationBadge.innerText = meta.chain_validation_status || "SECURE: Active";
+                validationBadge.style.color = (meta.chain_validation_status || "").includes('SECURE') ? 'var(--green)' : 'var(--rose)';
+                
+                data.forEach(b => {
                     const blockRow = document.createElement('div');
                     blockRow.className = 'ledger-block-row';
                     
@@ -808,7 +817,8 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ key, value: val, reason, proposer: 'WEB-CONTROL-PANEL' })
                 });
-                const result = await res.json();
+                const response = await res.json();
+                const result = response.data || response;
                 
                 if (result.consensus_reached) {
                     logToConsole(`Consensus REACHED (${result.consensus_ratio})! Mutation committed in Ledger Block #${result.block_index}.`, 'success');
@@ -853,7 +863,8 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ block_index: parseInt(block), key, value: val, reason })
                 });
-                const result = await res.json();
+                const response = await res.json();
+                const result = response.data || response;
                 
                 if (result.success) {
                     logToConsole(`⏰ Time Machine success! Timeline collapsed, re-mined, and state tree harmonized.`, 'success');

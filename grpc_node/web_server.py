@@ -6,6 +6,7 @@ import sqlite3
 import os
 import sys
 import grpc
+from urllib.parse import urlparse, parse_qs
 
 # Append path to import sync files
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -23,7 +24,12 @@ class SwarmDashboardHandler(http.server.BaseHTTPRequestHandler):
         pass
 
     def do_GET(self):
-        if self.path == "/" or self.path == "/index.html":
+        parsed_url = urlparse(self.path)
+        path = parsed_url.path
+        query = parse_qs(parsed_url.query)
+
+        # 1. Serving static front-end workspace
+        if path == "/" or path == "/index.html":
             self.send_response(200)
             self.send_header("Content-type", "text/html")
             self.end_headers()
@@ -31,19 +37,159 @@ class SwarmDashboardHandler(http.server.BaseHTTPRequestHandler):
                 self.wfile.write(f.read())
             return
 
-        elif self.path == "/api/agents":
-            self.send_json_response(self.query_db("SELECT agent_id, name, parent_agent_id, layer_level, specialty, subspecialty FROM agents ORDER BY layer_level ASC"))
+        # 2. REST 2.0 - API Root Discovery Endpoint
+        elif path == "/api/v2" or path == "/api/v2/":
+            directory = {
+                "_links": {
+                    "self": {"href": "/api/v2", "method": "GET"},
+                    "agents": {"href": "/api/v2/agents", "method": "GET"},
+                    "tickets": {"href": "/api/v2/tickets", "method": "GET", "filters": ["status", "queue"]},
+                    "transactions": {"href": "/api/v2/transactions", "method": "GET", "filters": ["type", "limit"]},
+                    "ledger": {"href": "/api/v2/ledger", "method": "GET"}
+                },
+                "meta": {
+                    "version": "2.0.0-REST",
+                    "codename": "Event Horizon HATEOAS",
+                    "status": "ONLINE",
+                    "engine": "POSIX sovereign Swarm Sync Engine"
+                }
+            }
+            self.send_json_response(directory)
             return
 
-        elif self.path == "/api/tickets":
-            self.send_json_response(self.query_db("SELECT ticket_id, Queue, Subject, Status, Owner, Creator, Priority, TimeEstimated, TimeWorked, TimeLeft, Created, Resolved, LastUpdated, LastUpdatedBy, agent_id, layer_level, specialty, task_description FROM tickets ORDER BY ticket_id DESC"))
+        # 3. REST 2.0 - Agents Endpoint
+        elif path == "/api/v2/agents" or path == "/api/agents":
+            agents = self.query_db("SELECT agent_id, name, parent_agent_id, layer_level, specialty, subspecialty FROM agents ORDER BY layer_level ASC")
+            
+            # Map HATEOAS links to individual agent objects
+            data = []
+            for a in agents:
+                a_data = dict(a)
+                a_data["_links"] = {
+                    "self": {"href": f"/api/v2/agents/{a['agent_id']}", "method": "GET"},
+                    "parent": {"href": f"/api/v2/agents/{a['parent_agent_id']}" if a['parent_agent_id'] else None, "method": "GET"},
+                    "tickets": {"href": f"/api/v2/tickets?agent_id={a['agent_id']}", "method": "GET"}
+                }
+                data.append(a_data)
+
+            response = {
+                "_links": {
+                    "self": {"href": "/api/v2/agents", "method": "GET"},
+                    "parent": {"href": "/api/v2", "method": "GET"}
+                },
+                "data": data,
+                "meta": {
+                    "total_count": len(data)
+                }
+            }
+            self.send_json_response(response)
             return
 
-        elif self.path == "/api/transactions":
-            self.send_json_response(self.query_db("SELECT transaction_id, ObjectType, ObjectId, TimeTaken, Type, Field, OldValue, NewValue, Data, Creator, Created FROM transactions ORDER BY transaction_id DESC"))
+        # 4. REST 2.0 - Tickets Endpoint (Supports filters: status, queue)
+        elif path == "/api/v2/tickets" or path == "/api/tickets":
+            status_filter = query.get("status", [None])[0]
+            queue_filter = query.get("queue", [None])[0]
+            
+            sql = "SELECT ticket_id, Queue, Subject, Status, Owner, Creator, Priority, TimeEstimated, TimeWorked, TimeLeft, Created, Resolved, LastUpdated, LastUpdatedBy, agent_id, layer_level, specialty, task_description FROM tickets"
+            params = []
+            conditions = []
+            
+            if status_filter:
+                conditions.append("Status = ?")
+                params.append(status_filter)
+            if queue_filter:
+                conditions.append("Queue = ?")
+                params.append(queue_filter)
+                
+            if conditions:
+                sql += " WHERE " + " AND ".join(conditions)
+            sql += " ORDER BY ticket_id DESC"
+            
+            tickets = self.query_db(sql, params)
+            
+            # Wrap in REST 2.0 HATEOAS response
+            data = []
+            for t in tickets:
+                t_data = dict(t)
+                t_data["_links"] = {
+                    "self": {"href": f"/api/v2/tickets/{t['ticket_id']}", "method": "GET"},
+                    "transactions": {"href": f"/api/v2/transactions?ticket_id={t['ticket_id']}", "method": "GET"}
+                }
+                data.append(t_data)
+                
+            response = {
+                "_links": {
+                    "self": {"href": "/api/v2/tickets", "method": "GET"},
+                    "create": {"href": "/api/v2/tickets", "method": "POST"},
+                    "parent": {"href": "/api/v2", "method": "GET"}
+                },
+                "data": data,
+                "meta": {
+                    "total_count": len(data),
+                    "filters_applied": {
+                        "status": status_filter,
+                        "queue": queue_filter
+                    }
+                }
+            }
+            self.send_json_response(response)
             return
 
-        elif self.path == "/api/ledger":
+        # 5. REST 2.0 - Transactions Endpoint (Supports filters: type, limit)
+        elif path == "/api/v2/transactions" or path == "/api/transactions":
+            type_filter = query.get("type", [None])[0]
+            limit_val = query.get("limit", [None])[0]
+            
+            sql = "SELECT transaction_id, ObjectType, ObjectId, TimeTaken, Type, Field, OldValue, NewValue, Data, Creator, Created FROM transactions"
+            params = []
+            conditions = []
+            
+            if type_filter:
+                conditions.append("Type = ?")
+                params.append(type_filter)
+                
+            if conditions:
+                sql += " WHERE " + " AND ".join(conditions)
+            sql += " ORDER BY transaction_id DESC"
+            
+            if limit_val:
+                try:
+                    sql += " LIMIT ?"
+                    params.append(int(limit_val))
+                except ValueError:
+                    pass
+                    
+            transactions = self.query_db(sql, params)
+            
+            # Wrap in REST 2.0
+            data = []
+            for tx in transactions:
+                tx_data = dict(tx)
+                tx_data["_links"] = {
+                    "self": {"href": f"/api/v2/transactions/{tx['transaction_id']}", "method": "GET"},
+                    "ticket": {"href": f"/api/v2/tickets/{tx['ObjectId']}", "method": "GET"}
+                }
+                data.append(tx_data)
+                
+            response = {
+                "_links": {
+                    "self": {"href": "/api/v2/transactions", "method": "GET"},
+                    "parent": {"href": "/api/v2", "method": "GET"}
+                },
+                "data": data,
+                "meta": {
+                    "total_count": len(data),
+                    "filters_applied": {
+                        "type": type_filter,
+                        "limit": limit_val
+                    }
+                }
+            }
+            self.send_json_response(response)
+            return
+
+        # 6. REST 2.0 - Ledger Endpoint
+        elif path == "/api/v2/ledger" or path == "/api/ledger":
             blocks = self.query_db("SELECT block_index, previous_hash, timestamp, agent_id, mutation_payload, consensus_votes, minority_report, block_hash FROM ledger ORDER BY block_index ASC")
             
             # Chain verification audit logic on retrieval
@@ -54,22 +200,39 @@ class SwarmDashboardHandler(http.server.BaseHTTPRequestHandler):
                     if r["previous_hash"] != prev_block["block_hash"]:
                         chain_valid = f"CORRUPTED: Hash mismatch at Block #{r['block_index']}!"
             
-            response_data = {
-                "blocks": blocks,
-                "chain_validation_status": chain_valid
+            # Wrap blocks
+            data = []
+            for b in blocks:
+                b_data = dict(b)
+                b_data["_links"] = {
+                    "self": {"href": f"/api/v2/ledger/{b['block_index']}", "method": "GET"},
+                    "timemachine_override": {"href": "/api/v2/timemachine", "method": "POST", "body": {"block_index": b['block_index']}}
+                }
+                data.append(b_data)
+
+            response = {
+                "_links": {
+                    "self": {"href": "/api/v2/ledger", "method": "GET"},
+                    "parent": {"href": "/api/v2", "method": "GET"}
+                },
+                "data": data,
+                "meta": {
+                    "chain_validation_status": chain_valid,
+                    "block_height": len(data)
+                }
             }
-            self.send_json_response(response_data)
+            self.send_json_response(response)
             return
 
         else:
-            self.send_error(404, "Resource not found")
+            self.send_error(404, "REST 2.0 Resource not found")
 
     def do_POST(self):
         content_length = int(self.headers['Content-Length'])
         post_data = self.rfile.read(content_length)
         payload = json.loads(post_data.decode('utf-8'))
 
-        if self.path == "/api/tickets/create":
+        if self.path == "/api/v2/tickets" or self.path == "/api/tickets/create":
             key = payload.get("key")
             val = payload.get("value")
             reason = payload.get("reason")
@@ -92,22 +255,35 @@ class SwarmDashboardHandler(http.server.BaseHTTPRequestHandler):
                         "vote_agree": v.vote_agree,
                         "rationale": v.rationale
                     })
+                
+                # Structured REST 2.0 Response Envelope
                 response_data = {
-                    "consensus_reached": res.consensus_reached,
-                    "consensus_ratio": res.consensus_ratio,
-                    "votes": votes,
-                    "minority_report": res.minority_report,
-                    "block_index": res.block_index,
-                    "block_hash": res.block_hash,
-                    "status": res.status
+                    "_links": {
+                        "self": {"href": f"/api/v2/tickets/{res.block_index}" if res.consensus_reached else None},
+                        "ledger": {"href": "/api/v2/ledger"}
+                    },
+                    "data": {
+                        "consensus_reached": res.consensus_reached,
+                        "consensus_ratio": res.consensus_ratio,
+                        "votes": votes,
+                        "minority_report": res.minority_report,
+                        "block_index": res.block_index,
+                        "block_hash": res.block_hash,
+                        "status": res.status
+                    }
                 }
             except Exception as e:
-                response_data = {"error": str(e), "consensus_reached": False, "consensus_ratio": "0/5"}
+                response_data = {
+                    "error": {
+                        "code": "GRPC_COMMUNICATION_ERROR",
+                        "message": str(e)
+                    }
+                }
 
             self.send_json_response(response_data)
             return
 
-        elif self.path == "/api/tickets/timemachine":
+        elif self.path == "/api/v2/timemachine" or self.path == "/api/tickets/timemachine":
             block_idx = int(payload.get("block_index"))
             key = payload.get("key")
             val = payload.get("value")
@@ -123,20 +299,31 @@ class SwarmDashboardHandler(http.server.BaseHTTPRequestHandler):
             )
             try:
                 res = stub.TimeTravelOverride(req)
+                
                 response_data = {
-                    "success": res.success,
-                    "message": res.message,
-                    "refactor_logs": list(res.refactor_logs),
-                    "new_chain_validation_status": res.new_chain_validation_status
+                    "_links": {
+                        "ledger": {"href": "/api/v2/ledger"}
+                    },
+                    "data": {
+                        "success": res.success,
+                        "message": res.message,
+                        "refactor_logs": list(res.refactor_logs),
+                        "new_chain_validation_status": res.new_chain_validation_status
+                    }
                 }
             except Exception as e:
-                response_data = {"success": False, "message": str(e), "refactor_logs": []}
+                response_data = {
+                    "error": {
+                        "code": "TIMETRAVEL_FAIL",
+                        "message": str(e)
+                    }
+                }
 
             self.send_json_response(response_data)
             return
 
         else:
-            self.send_error(404, "Endpoint not found")
+            self.send_error(404, "REST 2.0 Endpoint not found")
 
     def send_json_response(self, data):
         self.send_response(200)
@@ -163,7 +350,7 @@ if __name__ == "__main__":
     # Allow port reuse to prevent address already in use errors
     socketserver.TCPServer.allow_reuse_address = True
     with socketserver.TCPServer(("", PORT), handler) as httpd:
-        print(f"[WEB-SERVER] Sovereign Swarm control workspace listening on port {PORT}...")
+        print(f"[WEB-SERVER] REST 2.0 Sovereign Swarm control workspace listening on port {PORT}...")
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:
