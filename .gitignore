@@ -36,3 +36,12 @@ ENV/
 .env.local
 .DS_Store
 Thumbs.db
+
+# GCP Provisioning & Ops Deployment Scripts (sensitive)
+deploy_to_gcp.sh
+gcp_deploy_prep.sh
+gcp_startup.sh
+gcp_remote_launch*
+*gcp*
+*.sh.old
+
