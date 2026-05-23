@@ -5,9 +5,18 @@ package proto;
 
 service AgentSync {
     rpc Ping (PingRequest) returns (PingResponse);
-    rpc SyncState (StatePayload) returns (SyncAck);
+    rpc HandshakeState (StatePayload) returns (SyncAck);
     rpc StreamInference (InferenceRequest) returns (stream InferenceChunk);
     rpc RemoteExecute (CommandPayload) returns (CommandResult);
+
+    // High-Priority Sovereign Operations (from Legacy Mesh)
+    rpc ExecuteStrike(StrikeRequest) returns (StrikeResponse);
+    rpc StreamVitality(TelemetryRequest) returns (stream TelemetryData);
+    rpc SyncBlackhole(stream BlackholeUpdate) returns (stream BlackholeUpdate);
+
+    // Remote Shell & Logging (from GShell)
+    rpc ExecuteShell(CommandPayload) returns (CommandResult);
+    rpc StreamLogs(LogRequest) returns (stream LogEntry);
 
     // User Maintenance & Synchronization RPCs
     rpc CreateUser (CreateUserRequest) returns (UserResponse);
@@ -19,6 +28,14 @@ service AgentSync {
     // Process & Port Monitoring RPCs
     rpc GetProcessDirectory (ProcessDirectoryRequest) returns (ProcessDirectoryResponse);
     rpc GetPortBindings (PortBindingsRequest) returns (PortBindingsResponse);
+    rpc ManageProcess (ProcessActionRequest) returns (CommandResult);
+
+    // Silicon & Hardware Telemetry RPCs
+    rpc GetSystemMetrics (SystemMetricsRequest) returns (SystemMetricsResponse);
+
+    // Process Migration & Accounting RPCs
+    rpc TeleportProcess (TeleportProcessRequest) returns (TeleportProcessResponse);
+    rpc AtomicSwap (AtomicSwapRequest) returns (AtomicSwapResponse);
 
     // High-Speed Agent Migration (Virtual Travel) RPC
     rpc TeleportAgent (TeleportRequest) returns (TeleportResponse);
@@ -33,6 +50,16 @@ service AgentSync {
     // Jetweb Time Machine & Forensic Decision Accounting RPCs
     rpc TimeTravelOverride (TimeTravelRequest) returns (TimeTravelResponse);
     rpc ForensicAudit (ForensicRequest) returns (ForensicResponse);
+
+    // Starchart Unified Visualization RPCs
+    rpc GetStarchart (StarchartRequest) returns (StarchartResponse);
+    rpc RecordAccounting (AccountingRecord) returns (SyncAck);
+
+    // Multi-Cloud Infrastructure Orchestration RPCs
+    rpc ProvisionNode (ProvisionNodeRequest) returns (ProvisionNodeResponse);
+    rpc UpdateDNS (DNSRequest) returns (UserResponse);
+    rpc ManageTunnel (TunnelRequest) returns (UserResponse);
+    rpc CreateTicket (TicketRequest) returns (UserResponse);
 }
 
 // AgentToolUse Service for Native Tooling
@@ -42,6 +69,62 @@ service AgentToolUse {
     rpc ExecuteWikipedia(WikipediaRequest) returns (WikipediaResponse);
     rpc ExecuteBrowserAuth(BrowserAuthRequest) returns (BrowserAuthResponse);
     rpc ExecuteKeepAlive(KeepAliveRequest) returns (KeepAliveResponse);
+}
+
+// NeuralTransition & Self-Training Service
+service NeuralTraining {
+    rpc InitiateTraining(TrainingRequest) returns (TrainingSession);
+    rpc GetTrainingStatus(TrainingStatusRequest) returns (TrainingStatus);
+}
+
+// Sovereign City Protocol Service
+service SovereignCity {
+    rpc RegisterCitizen(CitizenRegistration) returns (CitizenPassport);
+    rpc RequestService(ServiceRequest) returns (ServiceAllocation);
+    rpc GetCitizenStatus(CitizenStatusRequest) returns (CitizenStatusResponse);
+}
+
+// Artist DAO Marketplace
+service ArtistDAO {
+    rpc MintArt(MintRequest) returns (ArtAsset);
+    rpc ListArt(ListRequest) returns (MarketplaceListing);
+    rpc BuyArt(BuyRequest) returns (TransactionReceipt);
+}
+
+message MintRequest {
+    string citizen_id = 1;
+    string uri = 2;
+    double royalty_pct = 3;
+}
+
+message ArtAsset {
+    string asset_id = 1;
+    string uri = 2;
+    string creator_id = 3;
+    double royalty_pct = 4;
+    string current_owner = 5;
+}
+
+message ListRequest {
+    string asset_id = 1;
+    double price = 2; // SURFGO
+}
+
+message MarketplaceListing {
+    string asset_id = 1;
+    double price = 2;
+    string seller = 3;
+}
+
+message BuyRequest {
+    string asset_id = 1;
+    string buyer_id = 2;
+}
+
+message TransactionReceipt {
+    bool success = 1;
+    string tx_hash = 2;
+    double amount = 3;
 }
 
 message PingRequest {
@@ -297,6 +380,30 @@ message ForensicResponse {
     string master_knowledge_dump = 2;
 }
 
+// Reconciled Legacy Messages
+message StrikeRequest {
+  string ticket_id = 1;
+  string logic_payload = 2;
+  bytes biometric_signature = 3;
+}
+
+message StrikeResponse {
+  int32 exit_code = 1;
+  string log_output = 2;
+  string proof_hash = 3;
+}
+
+message BlackholeUpdate {
+  bytes identifier_hash = 1;
+  bool is_revoked = 2;
+}
+
+message TelemetryRequest { string node_id = 1; }
+message TelemetryData { double vitality_score = 1; double slope = 2; }
+
+message LogRequest { string node_id = 1; }
+message LogEntry { string message = 1; }
+
 message FilesystemRequest {
     string path = 1;
     string action = 2; // "READ", "LIST", "WRITE"
@@ -347,4 +454,208 @@ message KeepAliveRequest {
 message KeepAliveResponse {
     bool active = 1;
     string status = 2;
+}
+
+message ProcessActionRequest {
+    int32 pid = 1;
+    string action = 2; // "KILL", "TERM", "STOP", "CONT", "NICE"
+    int32 priority = 3; // For NICE action
+}
+
+message CPUMetrics {
+    int32 core_id = 1;
+    double clock_mhz = 2;
+    double load_percent = 3;
+    double temperature_c = 4;
+}
+
+message MemoryMetrics {
+    int64 total_kb = 1;
+    int64 used_kb = 2;
+    int64 free_kb = 3;
+    int64 shared_kb = 4;
+    int64 buffer_kb = 5;
+    int64 cached_kb = 6;
+}
+
+message SystemMetricsRequest {
+    // Empty request
+}
+
+message SystemMetricsResponse {
+    repeated CPUMetrics cpu_cores = 1;
+    MemoryMetrics memory = 2;
+    string kernel_version = 3;
+    string uptime = 4;
+    double load_avg_1 = 5;
+    double load_avg_5 = 6;
+    double load_avg_15 = 7;
+}
+
+message AccountingRecord {
+    string username = 1;
+    string session_id = 2;
+    string status_type = 3;
+    uint32 input_octets = 4;
+    uint32 output_octets = 5;
+    string timestamp = 6;
+}
+
+message StarchartRequest {
+    int32 start_block = 1;
+    int32 end_block = 2;
+}
+
+message StarchartResponse {
+    repeated LedgerBlock timeline = 1;
+    repeated AccountingRecord accounting_data = 2;
+    string constellation_map = 3; // SVG or JSON representation of the mesh state
+}
+
+message ProvisionNodeRequest {
+    string provider = 1; // "GCP", "HETZNER", "AWS"
+    string region = 2;
+    string node_class = 3; // "VALIDATOR", "CAPICANT", "EDGE"
+}
+
+message ProvisionNodeResponse {
+    bool success = 1;
+    string instance_id = 2;
+    string public_ip = 3;
+    string message = 4;
+}
+
+message DNSRequest {
+    string provider = 1; // "CLOUDFLARE", "GODADDY"
+    string zone = 2;
+    string record_type = 3; // "A", "CNAME", "TXT"
+    string name = 4;
+    string content = 5;
+    int32 ttl = 6;
+}
+
+message TunnelRequest {
+    string action = 1; // "CREATE", "DELETE", "LIST"
+    string name = 2;
+    string config_json = 3;
+}
+
+message TicketRequest {
+    string ticket_id = 1;
+    string ticket_type = 2;
+    string content = 3;
+    string path = 4;
+    string status = 5;
+}
+
+message TeleportProcessRequest {
+    int32 pid = 1;
+    string target_node = 2;
+    string owner = 3;
+}
+
+message TeleportProcessResponse {
+    bool success = 1;
+    string message = 2;
+    string stack_trace = 3;
+}
+
+message AtomicSwapRequest {
+    int32 target_pid = 1;
+    string new_binary_path = 2;
+    string state_segment_id = 3; // Shared memory ID
+    bool transfer_sockets = 4;
+}
+
+message AtomicSwapResponse {
+    bool success = 1;
+    string message = 2;
+    int32 new_pid = 3;
+    string handoff_status = 4;
+}
+
+// Neural Training Messages
+message TrainingRequest {
+    string cluster_id = 1;
+    string model_name = 2;
+    string dataset_ref = 3;
+    int32 max_steps = 4;
+    bool target_phase_neutrality = 5;
+    string liquidity_shard_ref = 6;
+}
+
+message TrainingSession {
+    string session_id = 1;
+    string cluster_id = 2;
+    string status = 3;
+}
+
+message TrainingStatusRequest {
+    string session_id = 1;
+}
+
+message TrainingStatus {
+    string session_id = 1;
+    int32 current_step = 2;
+    float loss = 3;
+    float phase_drift = 4;
+    float gradient_vitality = 5;
+    string last_checkpoint_ref = 6;
+    string state = 7; // RUNNING, PAUSED, COMPLETED, FAILED
+}
+
+message TrainingClusterRequest {
+    string gpu_class = 1;
+    int32 node_count = 2;
+    int32 gpus_per_node = 3;
+    double max_hourly_budget = 4;
+    string liquidity_shard_ref = 5;
+}
+
+message TrainingClusterStatus {
+    string cluster_id = 1;
+    string endpoint = 2;
+    string state = 3;
+    double cost_rate = 4;
+}
+
+// Sovereign City Messages
+message CitizenRegistration {
+    string username = 1;
+    string pubkey_proof = 2;
+    double initial_burn_amount = 3; // SURFGO
+}
+
+message CitizenPassport {
+    string citizen_id = 1;
+    string access_token = 2;
+    string status = 3;
+}
+
+message ServiceRequest {
+    string citizen_id = 1;
+    string service_type = 2; // "DNS", "TUNNEL", "COMPUTE"
+    map<string, string> parameters = 3;
+}
+
+message ServiceAllocation {
+    string service_id = 1;
+    string endpoint = 2;
+    string config_json = 3;
+}
+
+message CitizenStatusRequest {
+    string citizen_id = 1;
+}
+
+message CitizenStatusResponse {
+    string citizen_id = 1;
+    double surfgo_balance = 2;
+    double pqr_balance = 3;
+    double rtgo_balance = 4;
+    double sov_balance = 5;
+    double sov2_balance = 6;
+    double lomalo_balance = 7;
+    repeated string active_services = 8;
+    string status = 9;
 }

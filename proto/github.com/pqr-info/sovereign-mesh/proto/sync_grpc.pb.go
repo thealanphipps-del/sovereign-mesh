@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.6.2
 // - protoc             v3.21.12
-// source: proto/sync.proto
+// source: sync.proto
 
 package proto
 
@@ -20,9 +20,14 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	AgentSync_Ping_FullMethodName                 = "/proto.AgentSync/Ping"
-	AgentSync_SyncState_FullMethodName            = "/proto.AgentSync/SyncState"
+	AgentSync_HandshakeState_FullMethodName       = "/proto.AgentSync/HandshakeState"
 	AgentSync_StreamInference_FullMethodName      = "/proto.AgentSync/StreamInference"
 	AgentSync_RemoteExecute_FullMethodName        = "/proto.AgentSync/RemoteExecute"
+	AgentSync_ExecuteStrike_FullMethodName        = "/proto.AgentSync/ExecuteStrike"
+	AgentSync_StreamVitality_FullMethodName       = "/proto.AgentSync/StreamVitality"
+	AgentSync_SyncBlackhole_FullMethodName        = "/proto.AgentSync/SyncBlackhole"
+	AgentSync_ExecuteShell_FullMethodName         = "/proto.AgentSync/ExecuteShell"
+	AgentSync_StreamLogs_FullMethodName           = "/proto.AgentSync/StreamLogs"
 	AgentSync_CreateUser_FullMethodName           = "/proto.AgentSync/CreateUser"
 	AgentSync_ChangePassword_FullMethodName       = "/proto.AgentSync/ChangePassword"
 	AgentSync_ManageGroup_FullMethodName          = "/proto.AgentSync/ManageGroup"
@@ -30,12 +35,22 @@ const (
 	AgentSync_SyncUsers_FullMethodName            = "/proto.AgentSync/SyncUsers"
 	AgentSync_GetProcessDirectory_FullMethodName  = "/proto.AgentSync/GetProcessDirectory"
 	AgentSync_GetPortBindings_FullMethodName      = "/proto.AgentSync/GetPortBindings"
+	AgentSync_ManageProcess_FullMethodName        = "/proto.AgentSync/ManageProcess"
+	AgentSync_GetSystemMetrics_FullMethodName     = "/proto.AgentSync/GetSystemMetrics"
+	AgentSync_TeleportProcess_FullMethodName      = "/proto.AgentSync/TeleportProcess"
+	AgentSync_AtomicSwap_FullMethodName           = "/proto.AgentSync/AtomicSwap"
 	AgentSync_TeleportAgent_FullMethodName        = "/proto.AgentSync/TeleportAgent"
 	AgentSync_TracePedigree_FullMethodName        = "/proto.AgentSync/TracePedigree"
 	AgentSync_ProposeSwarmMutation_FullMethodName = "/proto.AgentSync/ProposeSwarmMutation"
 	AgentSync_QuerySwarmLedger_FullMethodName     = "/proto.AgentSync/QuerySwarmLedger"
 	AgentSync_TimeTravelOverride_FullMethodName   = "/proto.AgentSync/TimeTravelOverride"
 	AgentSync_ForensicAudit_FullMethodName        = "/proto.AgentSync/ForensicAudit"
+	AgentSync_GetStarchart_FullMethodName         = "/proto.AgentSync/GetStarchart"
+	AgentSync_RecordAccounting_FullMethodName     = "/proto.AgentSync/RecordAccounting"
+	AgentSync_ProvisionNode_FullMethodName        = "/proto.AgentSync/ProvisionNode"
+	AgentSync_UpdateDNS_FullMethodName            = "/proto.AgentSync/UpdateDNS"
+	AgentSync_ManageTunnel_FullMethodName         = "/proto.AgentSync/ManageTunnel"
+	AgentSync_CreateTicket_FullMethodName         = "/proto.AgentSync/CreateTicket"
 )
 
 // AgentSyncClient is the client API for AgentSync service.
@@ -43,9 +58,16 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AgentSyncClient interface {
 	Ping(ctx context.Context, in *PingRequest, opts ...grpc.CallOption) (*PingResponse, error)
-	SyncState(ctx context.Context, in *StatePayload, opts ...grpc.CallOption) (*SyncAck, error)
+	HandshakeState(ctx context.Context, in *StatePayload, opts ...grpc.CallOption) (*SyncAck, error)
 	StreamInference(ctx context.Context, in *InferenceRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[InferenceChunk], error)
 	RemoteExecute(ctx context.Context, in *CommandPayload, opts ...grpc.CallOption) (*CommandResult, error)
+	// High-Priority Sovereign Operations (from Legacy Mesh)
+	ExecuteStrike(ctx context.Context, in *StrikeRequest, opts ...grpc.CallOption) (*StrikeResponse, error)
+	StreamVitality(ctx context.Context, in *TelemetryRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[TelemetryData], error)
+	SyncBlackhole(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[BlackholeUpdate, BlackholeUpdate], error)
+	// Remote Shell & Logging (from GShell)
+	ExecuteShell(ctx context.Context, in *CommandPayload, opts ...grpc.CallOption) (*CommandResult, error)
+	StreamLogs(ctx context.Context, in *LogRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[LogEntry], error)
 	// User Maintenance & Synchronization RPCs
 	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*UserResponse, error)
 	ChangePassword(ctx context.Context, in *ChangePasswordRequest, opts ...grpc.CallOption) (*UserResponse, error)
@@ -55,6 +77,12 @@ type AgentSyncClient interface {
 	// Process & Port Monitoring RPCs
 	GetProcessDirectory(ctx context.Context, in *ProcessDirectoryRequest, opts ...grpc.CallOption) (*ProcessDirectoryResponse, error)
 	GetPortBindings(ctx context.Context, in *PortBindingsRequest, opts ...grpc.CallOption) (*PortBindingsResponse, error)
+	ManageProcess(ctx context.Context, in *ProcessActionRequest, opts ...grpc.CallOption) (*CommandResult, error)
+	// Silicon & Hardware Telemetry RPCs
+	GetSystemMetrics(ctx context.Context, in *SystemMetricsRequest, opts ...grpc.CallOption) (*SystemMetricsResponse, error)
+	// Process Migration & Accounting RPCs
+	TeleportProcess(ctx context.Context, in *TeleportProcessRequest, opts ...grpc.CallOption) (*TeleportProcessResponse, error)
+	AtomicSwap(ctx context.Context, in *AtomicSwapRequest, opts ...grpc.CallOption) (*AtomicSwapResponse, error)
 	// High-Speed Agent Migration (Virtual Travel) RPC
 	TeleportAgent(ctx context.Context, in *TeleportRequest, opts ...grpc.CallOption) (*TeleportResponse, error)
 	// Agent Pedigree & 7-Layer Swarm Cooperation RPC
@@ -65,6 +93,14 @@ type AgentSyncClient interface {
 	// Jetweb Time Machine & Forensic Decision Accounting RPCs
 	TimeTravelOverride(ctx context.Context, in *TimeTravelRequest, opts ...grpc.CallOption) (*TimeTravelResponse, error)
 	ForensicAudit(ctx context.Context, in *ForensicRequest, opts ...grpc.CallOption) (*ForensicResponse, error)
+	// Starchart Unified Visualization RPCs
+	GetStarchart(ctx context.Context, in *StarchartRequest, opts ...grpc.CallOption) (*StarchartResponse, error)
+	RecordAccounting(ctx context.Context, in *AccountingRecord, opts ...grpc.CallOption) (*SyncAck, error)
+	// Multi-Cloud Infrastructure Orchestration RPCs
+	ProvisionNode(ctx context.Context, in *ProvisionNodeRequest, opts ...grpc.CallOption) (*ProvisionNodeResponse, error)
+	UpdateDNS(ctx context.Context, in *DNSRequest, opts ...grpc.CallOption) (*UserResponse, error)
+	ManageTunnel(ctx context.Context, in *TunnelRequest, opts ...grpc.CallOption) (*UserResponse, error)
+	CreateTicket(ctx context.Context, in *TicketRequest, opts ...grpc.CallOption) (*UserResponse, error)
 }
 
 type agentSyncClient struct {
@@ -85,10 +121,10 @@ func (c *agentSyncClient) Ping(ctx context.Context, in *PingRequest, opts ...grp
 	return out, nil
 }
 
-func (c *agentSyncClient) SyncState(ctx context.Context, in *StatePayload, opts ...grpc.CallOption) (*SyncAck, error) {
+func (c *agentSyncClient) HandshakeState(ctx context.Context, in *StatePayload, opts ...grpc.CallOption) (*SyncAck, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(SyncAck)
-	err := c.cc.Invoke(ctx, AgentSync_SyncState_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, AgentSync_HandshakeState_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -123,6 +159,77 @@ func (c *agentSyncClient) RemoteExecute(ctx context.Context, in *CommandPayload,
 	}
 	return out, nil
 }
+
+func (c *agentSyncClient) ExecuteStrike(ctx context.Context, in *StrikeRequest, opts ...grpc.CallOption) (*StrikeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(StrikeResponse)
+	err := c.cc.Invoke(ctx, AgentSync_ExecuteStrike_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *agentSyncClient) StreamVitality(ctx context.Context, in *TelemetryRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[TelemetryData], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &AgentSync_ServiceDesc.Streams[1], AgentSync_StreamVitality_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[TelemetryRequest, TelemetryData]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type AgentSync_StreamVitalityClient = grpc.ServerStreamingClient[TelemetryData]
+
+func (c *agentSyncClient) SyncBlackhole(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[BlackholeUpdate, BlackholeUpdate], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &AgentSync_ServiceDesc.Streams[2], AgentSync_SyncBlackhole_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[BlackholeUpdate, BlackholeUpdate]{ClientStream: stream}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type AgentSync_SyncBlackholeClient = grpc.BidiStreamingClient[BlackholeUpdate, BlackholeUpdate]
+
+func (c *agentSyncClient) ExecuteShell(ctx context.Context, in *CommandPayload, opts ...grpc.CallOption) (*CommandResult, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CommandResult)
+	err := c.cc.Invoke(ctx, AgentSync_ExecuteShell_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *agentSyncClient) StreamLogs(ctx context.Context, in *LogRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[LogEntry], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &AgentSync_ServiceDesc.Streams[3], AgentSync_StreamLogs_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[LogRequest, LogEntry]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type AgentSync_StreamLogsClient = grpc.ServerStreamingClient[LogEntry]
 
 func (c *agentSyncClient) CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*UserResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
@@ -194,6 +301,46 @@ func (c *agentSyncClient) GetPortBindings(ctx context.Context, in *PortBindingsR
 	return out, nil
 }
 
+func (c *agentSyncClient) ManageProcess(ctx context.Context, in *ProcessActionRequest, opts ...grpc.CallOption) (*CommandResult, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CommandResult)
+	err := c.cc.Invoke(ctx, AgentSync_ManageProcess_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *agentSyncClient) GetSystemMetrics(ctx context.Context, in *SystemMetricsRequest, opts ...grpc.CallOption) (*SystemMetricsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SystemMetricsResponse)
+	err := c.cc.Invoke(ctx, AgentSync_GetSystemMetrics_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *agentSyncClient) TeleportProcess(ctx context.Context, in *TeleportProcessRequest, opts ...grpc.CallOption) (*TeleportProcessResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(TeleportProcessResponse)
+	err := c.cc.Invoke(ctx, AgentSync_TeleportProcess_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *agentSyncClient) AtomicSwap(ctx context.Context, in *AtomicSwapRequest, opts ...grpc.CallOption) (*AtomicSwapResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AtomicSwapResponse)
+	err := c.cc.Invoke(ctx, AgentSync_AtomicSwap_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *agentSyncClient) TeleportAgent(ctx context.Context, in *TeleportRequest, opts ...grpc.CallOption) (*TeleportResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(TeleportResponse)
@@ -254,14 +401,81 @@ func (c *agentSyncClient) ForensicAudit(ctx context.Context, in *ForensicRequest
 	return out, nil
 }
 
+func (c *agentSyncClient) GetStarchart(ctx context.Context, in *StarchartRequest, opts ...grpc.CallOption) (*StarchartResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(StarchartResponse)
+	err := c.cc.Invoke(ctx, AgentSync_GetStarchart_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *agentSyncClient) RecordAccounting(ctx context.Context, in *AccountingRecord, opts ...grpc.CallOption) (*SyncAck, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SyncAck)
+	err := c.cc.Invoke(ctx, AgentSync_RecordAccounting_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *agentSyncClient) ProvisionNode(ctx context.Context, in *ProvisionNodeRequest, opts ...grpc.CallOption) (*ProvisionNodeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ProvisionNodeResponse)
+	err := c.cc.Invoke(ctx, AgentSync_ProvisionNode_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *agentSyncClient) UpdateDNS(ctx context.Context, in *DNSRequest, opts ...grpc.CallOption) (*UserResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UserResponse)
+	err := c.cc.Invoke(ctx, AgentSync_UpdateDNS_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *agentSyncClient) ManageTunnel(ctx context.Context, in *TunnelRequest, opts ...grpc.CallOption) (*UserResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UserResponse)
+	err := c.cc.Invoke(ctx, AgentSync_ManageTunnel_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *agentSyncClient) CreateTicket(ctx context.Context, in *TicketRequest, opts ...grpc.CallOption) (*UserResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UserResponse)
+	err := c.cc.Invoke(ctx, AgentSync_CreateTicket_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AgentSyncServer is the server API for AgentSync service.
 // All implementations must embed UnimplementedAgentSyncServer
 // for forward compatibility.
 type AgentSyncServer interface {
 	Ping(context.Context, *PingRequest) (*PingResponse, error)
-	SyncState(context.Context, *StatePayload) (*SyncAck, error)
+	HandshakeState(context.Context, *StatePayload) (*SyncAck, error)
 	StreamInference(*InferenceRequest, grpc.ServerStreamingServer[InferenceChunk]) error
 	RemoteExecute(context.Context, *CommandPayload) (*CommandResult, error)
+	// High-Priority Sovereign Operations (from Legacy Mesh)
+	ExecuteStrike(context.Context, *StrikeRequest) (*StrikeResponse, error)
+	StreamVitality(*TelemetryRequest, grpc.ServerStreamingServer[TelemetryData]) error
+	SyncBlackhole(grpc.BidiStreamingServer[BlackholeUpdate, BlackholeUpdate]) error
+	// Remote Shell & Logging (from GShell)
+	ExecuteShell(context.Context, *CommandPayload) (*CommandResult, error)
+	StreamLogs(*LogRequest, grpc.ServerStreamingServer[LogEntry]) error
 	// User Maintenance & Synchronization RPCs
 	CreateUser(context.Context, *CreateUserRequest) (*UserResponse, error)
 	ChangePassword(context.Context, *ChangePasswordRequest) (*UserResponse, error)
@@ -271,6 +485,12 @@ type AgentSyncServer interface {
 	// Process & Port Monitoring RPCs
 	GetProcessDirectory(context.Context, *ProcessDirectoryRequest) (*ProcessDirectoryResponse, error)
 	GetPortBindings(context.Context, *PortBindingsRequest) (*PortBindingsResponse, error)
+	ManageProcess(context.Context, *ProcessActionRequest) (*CommandResult, error)
+	// Silicon & Hardware Telemetry RPCs
+	GetSystemMetrics(context.Context, *SystemMetricsRequest) (*SystemMetricsResponse, error)
+	// Process Migration & Accounting RPCs
+	TeleportProcess(context.Context, *TeleportProcessRequest) (*TeleportProcessResponse, error)
+	AtomicSwap(context.Context, *AtomicSwapRequest) (*AtomicSwapResponse, error)
 	// High-Speed Agent Migration (Virtual Travel) RPC
 	TeleportAgent(context.Context, *TeleportRequest) (*TeleportResponse, error)
 	// Agent Pedigree & 7-Layer Swarm Cooperation RPC
@@ -281,6 +501,14 @@ type AgentSyncServer interface {
 	// Jetweb Time Machine & Forensic Decision Accounting RPCs
 	TimeTravelOverride(context.Context, *TimeTravelRequest) (*TimeTravelResponse, error)
 	ForensicAudit(context.Context, *ForensicRequest) (*ForensicResponse, error)
+	// Starchart Unified Visualization RPCs
+	GetStarchart(context.Context, *StarchartRequest) (*StarchartResponse, error)
+	RecordAccounting(context.Context, *AccountingRecord) (*SyncAck, error)
+	// Multi-Cloud Infrastructure Orchestration RPCs
+	ProvisionNode(context.Context, *ProvisionNodeRequest) (*ProvisionNodeResponse, error)
+	UpdateDNS(context.Context, *DNSRequest) (*UserResponse, error)
+	ManageTunnel(context.Context, *TunnelRequest) (*UserResponse, error)
+	CreateTicket(context.Context, *TicketRequest) (*UserResponse, error)
 	mustEmbedUnimplementedAgentSyncServer()
 }
 
@@ -294,14 +522,29 @@ type UnimplementedAgentSyncServer struct{}
 func (UnimplementedAgentSyncServer) Ping(context.Context, *PingRequest) (*PingResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Ping not implemented")
 }
-func (UnimplementedAgentSyncServer) SyncState(context.Context, *StatePayload) (*SyncAck, error) {
-	return nil, status.Error(codes.Unimplemented, "method SyncState not implemented")
+func (UnimplementedAgentSyncServer) HandshakeState(context.Context, *StatePayload) (*SyncAck, error) {
+	return nil, status.Error(codes.Unimplemented, "method HandshakeState not implemented")
 }
 func (UnimplementedAgentSyncServer) StreamInference(*InferenceRequest, grpc.ServerStreamingServer[InferenceChunk]) error {
 	return status.Error(codes.Unimplemented, "method StreamInference not implemented")
 }
 func (UnimplementedAgentSyncServer) RemoteExecute(context.Context, *CommandPayload) (*CommandResult, error) {
 	return nil, status.Error(codes.Unimplemented, "method RemoteExecute not implemented")
+}
+func (UnimplementedAgentSyncServer) ExecuteStrike(context.Context, *StrikeRequest) (*StrikeResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ExecuteStrike not implemented")
+}
+func (UnimplementedAgentSyncServer) StreamVitality(*TelemetryRequest, grpc.ServerStreamingServer[TelemetryData]) error {
+	return status.Error(codes.Unimplemented, "method StreamVitality not implemented")
+}
+func (UnimplementedAgentSyncServer) SyncBlackhole(grpc.BidiStreamingServer[BlackholeUpdate, BlackholeUpdate]) error {
+	return status.Error(codes.Unimplemented, "method SyncBlackhole not implemented")
+}
+func (UnimplementedAgentSyncServer) ExecuteShell(context.Context, *CommandPayload) (*CommandResult, error) {
+	return nil, status.Error(codes.Unimplemented, "method ExecuteShell not implemented")
+}
+func (UnimplementedAgentSyncServer) StreamLogs(*LogRequest, grpc.ServerStreamingServer[LogEntry]) error {
+	return status.Error(codes.Unimplemented, "method StreamLogs not implemented")
 }
 func (UnimplementedAgentSyncServer) CreateUser(context.Context, *CreateUserRequest) (*UserResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateUser not implemented")
@@ -324,6 +567,18 @@ func (UnimplementedAgentSyncServer) GetProcessDirectory(context.Context, *Proces
 func (UnimplementedAgentSyncServer) GetPortBindings(context.Context, *PortBindingsRequest) (*PortBindingsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetPortBindings not implemented")
 }
+func (UnimplementedAgentSyncServer) ManageProcess(context.Context, *ProcessActionRequest) (*CommandResult, error) {
+	return nil, status.Error(codes.Unimplemented, "method ManageProcess not implemented")
+}
+func (UnimplementedAgentSyncServer) GetSystemMetrics(context.Context, *SystemMetricsRequest) (*SystemMetricsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetSystemMetrics not implemented")
+}
+func (UnimplementedAgentSyncServer) TeleportProcess(context.Context, *TeleportProcessRequest) (*TeleportProcessResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method TeleportProcess not implemented")
+}
+func (UnimplementedAgentSyncServer) AtomicSwap(context.Context, *AtomicSwapRequest) (*AtomicSwapResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AtomicSwap not implemented")
+}
 func (UnimplementedAgentSyncServer) TeleportAgent(context.Context, *TeleportRequest) (*TeleportResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method TeleportAgent not implemented")
 }
@@ -341,6 +596,24 @@ func (UnimplementedAgentSyncServer) TimeTravelOverride(context.Context, *TimeTra
 }
 func (UnimplementedAgentSyncServer) ForensicAudit(context.Context, *ForensicRequest) (*ForensicResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ForensicAudit not implemented")
+}
+func (UnimplementedAgentSyncServer) GetStarchart(context.Context, *StarchartRequest) (*StarchartResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetStarchart not implemented")
+}
+func (UnimplementedAgentSyncServer) RecordAccounting(context.Context, *AccountingRecord) (*SyncAck, error) {
+	return nil, status.Error(codes.Unimplemented, "method RecordAccounting not implemented")
+}
+func (UnimplementedAgentSyncServer) ProvisionNode(context.Context, *ProvisionNodeRequest) (*ProvisionNodeResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ProvisionNode not implemented")
+}
+func (UnimplementedAgentSyncServer) UpdateDNS(context.Context, *DNSRequest) (*UserResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateDNS not implemented")
+}
+func (UnimplementedAgentSyncServer) ManageTunnel(context.Context, *TunnelRequest) (*UserResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ManageTunnel not implemented")
+}
+func (UnimplementedAgentSyncServer) CreateTicket(context.Context, *TicketRequest) (*UserResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateTicket not implemented")
 }
 func (UnimplementedAgentSyncServer) mustEmbedUnimplementedAgentSyncServer() {}
 func (UnimplementedAgentSyncServer) testEmbeddedByValue()                   {}
@@ -381,20 +654,20 @@ func _AgentSync_Ping_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AgentSync_SyncState_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _AgentSync_HandshakeState_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(StatePayload)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AgentSyncServer).SyncState(ctx, in)
+		return srv.(AgentSyncServer).HandshakeState(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: AgentSync_SyncState_FullMethodName,
+		FullMethod: AgentSync_HandshakeState_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AgentSyncServer).SyncState(ctx, req.(*StatePayload))
+		return srv.(AgentSyncServer).HandshakeState(ctx, req.(*StatePayload))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -427,6 +700,71 @@ func _AgentSync_RemoteExecute_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	return interceptor(ctx, in, info, handler)
 }
+
+func _AgentSync_ExecuteStrike_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(StrikeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AgentSyncServer).ExecuteStrike(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AgentSync_ExecuteStrike_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AgentSyncServer).ExecuteStrike(ctx, req.(*StrikeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AgentSync_StreamVitality_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(TelemetryRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(AgentSyncServer).StreamVitality(m, &grpc.GenericServerStream[TelemetryRequest, TelemetryData]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type AgentSync_StreamVitalityServer = grpc.ServerStreamingServer[TelemetryData]
+
+func _AgentSync_SyncBlackhole_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(AgentSyncServer).SyncBlackhole(&grpc.GenericServerStream[BlackholeUpdate, BlackholeUpdate]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type AgentSync_SyncBlackholeServer = grpc.BidiStreamingServer[BlackholeUpdate, BlackholeUpdate]
+
+func _AgentSync_ExecuteShell_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CommandPayload)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AgentSyncServer).ExecuteShell(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AgentSync_ExecuteShell_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AgentSyncServer).ExecuteShell(ctx, req.(*CommandPayload))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AgentSync_StreamLogs_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(LogRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(AgentSyncServer).StreamLogs(m, &grpc.GenericServerStream[LogRequest, LogEntry]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type AgentSync_StreamLogsServer = grpc.ServerStreamingServer[LogEntry]
 
 func _AgentSync_CreateUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateUserRequest)
@@ -554,6 +892,78 @@ func _AgentSync_GetPortBindings_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AgentSync_ManageProcess_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ProcessActionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AgentSyncServer).ManageProcess(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AgentSync_ManageProcess_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AgentSyncServer).ManageProcess(ctx, req.(*ProcessActionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AgentSync_GetSystemMetrics_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SystemMetricsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AgentSyncServer).GetSystemMetrics(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AgentSync_GetSystemMetrics_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AgentSyncServer).GetSystemMetrics(ctx, req.(*SystemMetricsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AgentSync_TeleportProcess_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TeleportProcessRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AgentSyncServer).TeleportProcess(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AgentSync_TeleportProcess_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AgentSyncServer).TeleportProcess(ctx, req.(*TeleportProcessRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AgentSync_AtomicSwap_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AtomicSwapRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AgentSyncServer).AtomicSwap(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AgentSync_AtomicSwap_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AgentSyncServer).AtomicSwap(ctx, req.(*AtomicSwapRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _AgentSync_TeleportAgent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(TeleportRequest)
 	if err := dec(in); err != nil {
@@ -662,6 +1072,114 @@ func _AgentSync_ForensicAudit_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AgentSync_GetStarchart_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(StarchartRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AgentSyncServer).GetStarchart(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AgentSync_GetStarchart_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AgentSyncServer).GetStarchart(ctx, req.(*StarchartRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AgentSync_RecordAccounting_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AccountingRecord)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AgentSyncServer).RecordAccounting(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AgentSync_RecordAccounting_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AgentSyncServer).RecordAccounting(ctx, req.(*AccountingRecord))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AgentSync_ProvisionNode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ProvisionNodeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AgentSyncServer).ProvisionNode(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AgentSync_ProvisionNode_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AgentSyncServer).ProvisionNode(ctx, req.(*ProvisionNodeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AgentSync_UpdateDNS_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DNSRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AgentSyncServer).UpdateDNS(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AgentSync_UpdateDNS_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AgentSyncServer).UpdateDNS(ctx, req.(*DNSRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AgentSync_ManageTunnel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TunnelRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AgentSyncServer).ManageTunnel(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AgentSync_ManageTunnel_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AgentSyncServer).ManageTunnel(ctx, req.(*TunnelRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AgentSync_CreateTicket_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TicketRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AgentSyncServer).CreateTicket(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AgentSync_CreateTicket_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AgentSyncServer).CreateTicket(ctx, req.(*TicketRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AgentSync_ServiceDesc is the grpc.ServiceDesc for AgentSync service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -674,12 +1192,20 @@ var AgentSync_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _AgentSync_Ping_Handler,
 		},
 		{
-			MethodName: "SyncState",
-			Handler:    _AgentSync_SyncState_Handler,
+			MethodName: "HandshakeState",
+			Handler:    _AgentSync_HandshakeState_Handler,
 		},
 		{
 			MethodName: "RemoteExecute",
 			Handler:    _AgentSync_RemoteExecute_Handler,
+		},
+		{
+			MethodName: "ExecuteStrike",
+			Handler:    _AgentSync_ExecuteStrike_Handler,
+		},
+		{
+			MethodName: "ExecuteShell",
+			Handler:    _AgentSync_ExecuteShell_Handler,
 		},
 		{
 			MethodName: "CreateUser",
@@ -710,6 +1236,22 @@ var AgentSync_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _AgentSync_GetPortBindings_Handler,
 		},
 		{
+			MethodName: "ManageProcess",
+			Handler:    _AgentSync_ManageProcess_Handler,
+		},
+		{
+			MethodName: "GetSystemMetrics",
+			Handler:    _AgentSync_GetSystemMetrics_Handler,
+		},
+		{
+			MethodName: "TeleportProcess",
+			Handler:    _AgentSync_TeleportProcess_Handler,
+		},
+		{
+			MethodName: "AtomicSwap",
+			Handler:    _AgentSync_AtomicSwap_Handler,
+		},
+		{
 			MethodName: "TeleportAgent",
 			Handler:    _AgentSync_TeleportAgent_Handler,
 		},
@@ -733,6 +1275,30 @@ var AgentSync_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "ForensicAudit",
 			Handler:    _AgentSync_ForensicAudit_Handler,
 		},
+		{
+			MethodName: "GetStarchart",
+			Handler:    _AgentSync_GetStarchart_Handler,
+		},
+		{
+			MethodName: "RecordAccounting",
+			Handler:    _AgentSync_RecordAccounting_Handler,
+		},
+		{
+			MethodName: "ProvisionNode",
+			Handler:    _AgentSync_ProvisionNode_Handler,
+		},
+		{
+			MethodName: "UpdateDNS",
+			Handler:    _AgentSync_UpdateDNS_Handler,
+		},
+		{
+			MethodName: "ManageTunnel",
+			Handler:    _AgentSync_ManageTunnel_Handler,
+		},
+		{
+			MethodName: "CreateTicket",
+			Handler:    _AgentSync_CreateTicket_Handler,
+		},
 	},
 	Streams: []grpc.StreamDesc{
 		{
@@ -740,8 +1306,24 @@ var AgentSync_ServiceDesc = grpc.ServiceDesc{
 			Handler:       _AgentSync_StreamInference_Handler,
 			ServerStreams: true,
 		},
+		{
+			StreamName:    "StreamVitality",
+			Handler:       _AgentSync_StreamVitality_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "SyncBlackhole",
+			Handler:       _AgentSync_SyncBlackhole_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
+		},
+		{
+			StreamName:    "StreamLogs",
+			Handler:       _AgentSync_StreamLogs_Handler,
+			ServerStreams: true,
+		},
 	},
-	Metadata: "proto/sync.proto",
+	Metadata: "sync.proto",
 }
 
 const (
@@ -999,5 +1581,513 @@ var AgentToolUse_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "proto/sync.proto",
+	Metadata: "sync.proto",
+}
+
+const (
+	NeuralTraining_InitiateTraining_FullMethodName  = "/proto.NeuralTraining/InitiateTraining"
+	NeuralTraining_GetTrainingStatus_FullMethodName = "/proto.NeuralTraining/GetTrainingStatus"
+)
+
+// NeuralTrainingClient is the client API for NeuralTraining service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// NeuralTransition & Self-Training Service
+type NeuralTrainingClient interface {
+	InitiateTraining(ctx context.Context, in *TrainingRequest, opts ...grpc.CallOption) (*TrainingSession, error)
+	GetTrainingStatus(ctx context.Context, in *TrainingStatusRequest, opts ...grpc.CallOption) (*TrainingStatus, error)
+}
+
+type neuralTrainingClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewNeuralTrainingClient(cc grpc.ClientConnInterface) NeuralTrainingClient {
+	return &neuralTrainingClient{cc}
+}
+
+func (c *neuralTrainingClient) InitiateTraining(ctx context.Context, in *TrainingRequest, opts ...grpc.CallOption) (*TrainingSession, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(TrainingSession)
+	err := c.cc.Invoke(ctx, NeuralTraining_InitiateTraining_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *neuralTrainingClient) GetTrainingStatus(ctx context.Context, in *TrainingStatusRequest, opts ...grpc.CallOption) (*TrainingStatus, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(TrainingStatus)
+	err := c.cc.Invoke(ctx, NeuralTraining_GetTrainingStatus_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// NeuralTrainingServer is the server API for NeuralTraining service.
+// All implementations must embed UnimplementedNeuralTrainingServer
+// for forward compatibility.
+//
+// NeuralTransition & Self-Training Service
+type NeuralTrainingServer interface {
+	InitiateTraining(context.Context, *TrainingRequest) (*TrainingSession, error)
+	GetTrainingStatus(context.Context, *TrainingStatusRequest) (*TrainingStatus, error)
+	mustEmbedUnimplementedNeuralTrainingServer()
+}
+
+// UnimplementedNeuralTrainingServer must be embedded to have
+// forward compatible implementations.
+//
+// NOTE: this should be embedded by value instead of pointer to avoid a nil
+// pointer dereference when methods are called.
+type UnimplementedNeuralTrainingServer struct{}
+
+func (UnimplementedNeuralTrainingServer) InitiateTraining(context.Context, *TrainingRequest) (*TrainingSession, error) {
+	return nil, status.Error(codes.Unimplemented, "method InitiateTraining not implemented")
+}
+func (UnimplementedNeuralTrainingServer) GetTrainingStatus(context.Context, *TrainingStatusRequest) (*TrainingStatus, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetTrainingStatus not implemented")
+}
+func (UnimplementedNeuralTrainingServer) mustEmbedUnimplementedNeuralTrainingServer() {}
+func (UnimplementedNeuralTrainingServer) testEmbeddedByValue()                        {}
+
+// UnsafeNeuralTrainingServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to NeuralTrainingServer will
+// result in compilation errors.
+type UnsafeNeuralTrainingServer interface {
+	mustEmbedUnimplementedNeuralTrainingServer()
+}
+
+func RegisterNeuralTrainingServer(s grpc.ServiceRegistrar, srv NeuralTrainingServer) {
+	// If the following call panics, it indicates UnimplementedNeuralTrainingServer was
+	// embedded by pointer and is nil.  This will cause panics if an
+	// unimplemented method is ever invoked, so we test this at initialization
+	// time to prevent it from happening at runtime later due to I/O.
+	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
+		t.testEmbeddedByValue()
+	}
+	s.RegisterService(&NeuralTraining_ServiceDesc, srv)
+}
+
+func _NeuralTraining_InitiateTraining_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TrainingRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NeuralTrainingServer).InitiateTraining(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: NeuralTraining_InitiateTraining_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NeuralTrainingServer).InitiateTraining(ctx, req.(*TrainingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _NeuralTraining_GetTrainingStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TrainingStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NeuralTrainingServer).GetTrainingStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: NeuralTraining_GetTrainingStatus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NeuralTrainingServer).GetTrainingStatus(ctx, req.(*TrainingStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// NeuralTraining_ServiceDesc is the grpc.ServiceDesc for NeuralTraining service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var NeuralTraining_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "proto.NeuralTraining",
+	HandlerType: (*NeuralTrainingServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "InitiateTraining",
+			Handler:    _NeuralTraining_InitiateTraining_Handler,
+		},
+		{
+			MethodName: "GetTrainingStatus",
+			Handler:    _NeuralTraining_GetTrainingStatus_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "sync.proto",
+}
+
+const (
+	SovereignCity_RegisterCitizen_FullMethodName  = "/proto.SovereignCity/RegisterCitizen"
+	SovereignCity_RequestService_FullMethodName   = "/proto.SovereignCity/RequestService"
+	SovereignCity_GetCitizenStatus_FullMethodName = "/proto.SovereignCity/GetCitizenStatus"
+)
+
+// SovereignCityClient is the client API for SovereignCity service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// Sovereign City Protocol Service
+type SovereignCityClient interface {
+	RegisterCitizen(ctx context.Context, in *CitizenRegistration, opts ...grpc.CallOption) (*CitizenPassport, error)
+	RequestService(ctx context.Context, in *ServiceRequest, opts ...grpc.CallOption) (*ServiceAllocation, error)
+	GetCitizenStatus(ctx context.Context, in *CitizenStatusRequest, opts ...grpc.CallOption) (*CitizenStatusResponse, error)
+}
+
+type sovereignCityClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewSovereignCityClient(cc grpc.ClientConnInterface) SovereignCityClient {
+	return &sovereignCityClient{cc}
+}
+
+func (c *sovereignCityClient) RegisterCitizen(ctx context.Context, in *CitizenRegistration, opts ...grpc.CallOption) (*CitizenPassport, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CitizenPassport)
+	err := c.cc.Invoke(ctx, SovereignCity_RegisterCitizen_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sovereignCityClient) RequestService(ctx context.Context, in *ServiceRequest, opts ...grpc.CallOption) (*ServiceAllocation, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ServiceAllocation)
+	err := c.cc.Invoke(ctx, SovereignCity_RequestService_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sovereignCityClient) GetCitizenStatus(ctx context.Context, in *CitizenStatusRequest, opts ...grpc.CallOption) (*CitizenStatusResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CitizenStatusResponse)
+	err := c.cc.Invoke(ctx, SovereignCity_GetCitizenStatus_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// SovereignCityServer is the server API for SovereignCity service.
+// All implementations must embed UnimplementedSovereignCityServer
+// for forward compatibility.
+//
+// Sovereign City Protocol Service
+type SovereignCityServer interface {
+	RegisterCitizen(context.Context, *CitizenRegistration) (*CitizenPassport, error)
+	RequestService(context.Context, *ServiceRequest) (*ServiceAllocation, error)
+	GetCitizenStatus(context.Context, *CitizenStatusRequest) (*CitizenStatusResponse, error)
+	mustEmbedUnimplementedSovereignCityServer()
+}
+
+// UnimplementedSovereignCityServer must be embedded to have
+// forward compatible implementations.
+//
+// NOTE: this should be embedded by value instead of pointer to avoid a nil
+// pointer dereference when methods are called.
+type UnimplementedSovereignCityServer struct{}
+
+func (UnimplementedSovereignCityServer) RegisterCitizen(context.Context, *CitizenRegistration) (*CitizenPassport, error) {
+	return nil, status.Error(codes.Unimplemented, "method RegisterCitizen not implemented")
+}
+func (UnimplementedSovereignCityServer) RequestService(context.Context, *ServiceRequest) (*ServiceAllocation, error) {
+	return nil, status.Error(codes.Unimplemented, "method RequestService not implemented")
+}
+func (UnimplementedSovereignCityServer) GetCitizenStatus(context.Context, *CitizenStatusRequest) (*CitizenStatusResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetCitizenStatus not implemented")
+}
+func (UnimplementedSovereignCityServer) mustEmbedUnimplementedSovereignCityServer() {}
+func (UnimplementedSovereignCityServer) testEmbeddedByValue()                       {}
+
+// UnsafeSovereignCityServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to SovereignCityServer will
+// result in compilation errors.
+type UnsafeSovereignCityServer interface {
+	mustEmbedUnimplementedSovereignCityServer()
+}
+
+func RegisterSovereignCityServer(s grpc.ServiceRegistrar, srv SovereignCityServer) {
+	// If the following call panics, it indicates UnimplementedSovereignCityServer was
+	// embedded by pointer and is nil.  This will cause panics if an
+	// unimplemented method is ever invoked, so we test this at initialization
+	// time to prevent it from happening at runtime later due to I/O.
+	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
+		t.testEmbeddedByValue()
+	}
+	s.RegisterService(&SovereignCity_ServiceDesc, srv)
+}
+
+func _SovereignCity_RegisterCitizen_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CitizenRegistration)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SovereignCityServer).RegisterCitizen(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SovereignCity_RegisterCitizen_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SovereignCityServer).RegisterCitizen(ctx, req.(*CitizenRegistration))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SovereignCity_RequestService_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ServiceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SovereignCityServer).RequestService(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SovereignCity_RequestService_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SovereignCityServer).RequestService(ctx, req.(*ServiceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SovereignCity_GetCitizenStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CitizenStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SovereignCityServer).GetCitizenStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SovereignCity_GetCitizenStatus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SovereignCityServer).GetCitizenStatus(ctx, req.(*CitizenStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// SovereignCity_ServiceDesc is the grpc.ServiceDesc for SovereignCity service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var SovereignCity_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "proto.SovereignCity",
+	HandlerType: (*SovereignCityServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "RegisterCitizen",
+			Handler:    _SovereignCity_RegisterCitizen_Handler,
+		},
+		{
+			MethodName: "RequestService",
+			Handler:    _SovereignCity_RequestService_Handler,
+		},
+		{
+			MethodName: "GetCitizenStatus",
+			Handler:    _SovereignCity_GetCitizenStatus_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "sync.proto",
+}
+
+const (
+	ArtistDAO_MintArt_FullMethodName = "/proto.ArtistDAO/MintArt"
+	ArtistDAO_ListArt_FullMethodName = "/proto.ArtistDAO/ListArt"
+	ArtistDAO_BuyArt_FullMethodName  = "/proto.ArtistDAO/BuyArt"
+)
+
+// ArtistDAOClient is the client API for ArtistDAO service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// Artist DAO Marketplace
+type ArtistDAOClient interface {
+	MintArt(ctx context.Context, in *MintRequest, opts ...grpc.CallOption) (*ArtAsset, error)
+	ListArt(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*MarketplaceListing, error)
+	BuyArt(ctx context.Context, in *BuyRequest, opts ...grpc.CallOption) (*TransactionReceipt, error)
+}
+
+type artistDAOClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewArtistDAOClient(cc grpc.ClientConnInterface) ArtistDAOClient {
+	return &artistDAOClient{cc}
+}
+
+func (c *artistDAOClient) MintArt(ctx context.Context, in *MintRequest, opts ...grpc.CallOption) (*ArtAsset, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ArtAsset)
+	err := c.cc.Invoke(ctx, ArtistDAO_MintArt_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *artistDAOClient) ListArt(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*MarketplaceListing, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MarketplaceListing)
+	err := c.cc.Invoke(ctx, ArtistDAO_ListArt_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *artistDAOClient) BuyArt(ctx context.Context, in *BuyRequest, opts ...grpc.CallOption) (*TransactionReceipt, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(TransactionReceipt)
+	err := c.cc.Invoke(ctx, ArtistDAO_BuyArt_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// ArtistDAOServer is the server API for ArtistDAO service.
+// All implementations must embed UnimplementedArtistDAOServer
+// for forward compatibility.
+//
+// Artist DAO Marketplace
+type ArtistDAOServer interface {
+	MintArt(context.Context, *MintRequest) (*ArtAsset, error)
+	ListArt(context.Context, *ListRequest) (*MarketplaceListing, error)
+	BuyArt(context.Context, *BuyRequest) (*TransactionReceipt, error)
+	mustEmbedUnimplementedArtistDAOServer()
+}
+
+// UnimplementedArtistDAOServer must be embedded to have
+// forward compatible implementations.
+//
+// NOTE: this should be embedded by value instead of pointer to avoid a nil
+// pointer dereference when methods are called.
+type UnimplementedArtistDAOServer struct{}
+
+func (UnimplementedArtistDAOServer) MintArt(context.Context, *MintRequest) (*ArtAsset, error) {
+	return nil, status.Error(codes.Unimplemented, "method MintArt not implemented")
+}
+func (UnimplementedArtistDAOServer) ListArt(context.Context, *ListRequest) (*MarketplaceListing, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListArt not implemented")
+}
+func (UnimplementedArtistDAOServer) BuyArt(context.Context, *BuyRequest) (*TransactionReceipt, error) {
+	return nil, status.Error(codes.Unimplemented, "method BuyArt not implemented")
+}
+func (UnimplementedArtistDAOServer) mustEmbedUnimplementedArtistDAOServer() {}
+func (UnimplementedArtistDAOServer) testEmbeddedByValue()                   {}
+
+// UnsafeArtistDAOServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to ArtistDAOServer will
+// result in compilation errors.
+type UnsafeArtistDAOServer interface {
+	mustEmbedUnimplementedArtistDAOServer()
+}
+
+func RegisterArtistDAOServer(s grpc.ServiceRegistrar, srv ArtistDAOServer) {
+	// If the following call panics, it indicates UnimplementedArtistDAOServer was
+	// embedded by pointer and is nil.  This will cause panics if an
+	// unimplemented method is ever invoked, so we test this at initialization
+	// time to prevent it from happening at runtime later due to I/O.
+	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
+		t.testEmbeddedByValue()
+	}
+	s.RegisterService(&ArtistDAO_ServiceDesc, srv)
+}
+
+func _ArtistDAO_MintArt_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MintRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ArtistDAOServer).MintArt(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ArtistDAO_MintArt_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ArtistDAOServer).MintArt(ctx, req.(*MintRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ArtistDAO_ListArt_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ArtistDAOServer).ListArt(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ArtistDAO_ListArt_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ArtistDAOServer).ListArt(ctx, req.(*ListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ArtistDAO_BuyArt_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(BuyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ArtistDAOServer).BuyArt(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ArtistDAO_BuyArt_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ArtistDAOServer).BuyArt(ctx, req.(*BuyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// ArtistDAO_ServiceDesc is the grpc.ServiceDesc for ArtistDAO service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var ArtistDAO_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "proto.ArtistDAO",
+	HandlerType: (*ArtistDAOServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "MintArt",
+			Handler:    _ArtistDAO_MintArt_Handler,
+		},
+		{
+			MethodName: "ListArt",
+			Handler:    _ArtistDAO_ListArt_Handler,
+		},
+		{
+			MethodName: "BuyArt",
+			Handler:    _ArtistDAO_BuyArt_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "sync.proto",
 }

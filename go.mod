@@ -11,6 +11,7 @@ require (
 	google.golang.org/api v0.187.0
 	google.golang.org/grpc v1.64.0
 	google.golang.org/protobuf v1.34.2
+	layeh.com/radius v0.0.0-20231213012653-1006025d24f8
 )
 
 require (

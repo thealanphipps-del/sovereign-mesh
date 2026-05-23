@@ -124,9 +124,69 @@ type OptimizationTask struct {
 	Method      string `json:"method"`
 }
 
+// Process represents a transportable execution unit within the mesh.
+type Process struct {
+	PID           int32     `json:"pid"`
+	Owner         string    `json:"owner"`
+	Status        string    `json:"status"`
+	CurrentNode   string    `json:"current_node"`
+	StackHistory  []string  `json:"stack_history"`
+	AccountingID  string    `json:"accounting_id"`  // RADIUS session ID
+	ResourceUsage float64   `json:"resource_usage"` // Accumulated CBC cost
+	LastMigrated  time.Time `json:"last_migrated"`
+}
+
+// Neural Training Types
+type TrainingClusterRequest struct {
+	GPUClass          string
+	NodeCount         int32
+	GPUsPerNode       int32
+	MaxHourlyBudget   float64
+	LiquidityShardRef string
+}
+
+type TrainingClusterStatus struct {
+	ClusterID string
+	Endpoint  string
+	State     string
+	CostRate  float64
+}
+
+type TrainingSessionState struct {
+	SessionID         string
+	CurrentStep       int32
+	Loss              float32
+	PhaseDrift        float32
+	GradientVitality  float32
+	LastCheckpointRef string
+	State             string
+}
+
+// AssetType for the Sovereign Mesh marketplace
+type AssetType string
+
+const (
+	PQR    AssetType = "PQR"
+	SURFGO AssetType = "SURFGO"
+	RTGO   AssetType = "RTGO"
+	SOV    AssetType = "SOV"   // RMI Original Sovereign Currency (Resurrected)
+	SOV2   AssetType = "SOV-2" // Secondary Liquid Engine
+	LOMALO AssetType = "LOMALO" // EBI Distribution Asset
+)
+
+// Sovereign City Types
+type Citizen struct {
+	CitizenID      string
+	Username       string
+	Balances       map[AssetType]float64
+	ActiveServices []string
+	Status         string // "ACTIVE", "PURGED"
+}
+
 // Controller exports the main orchestration engine.
 type Controller struct {
 	agents    map[string]*Agent
+	processes map[int32]*Process
 	prompts   map[string]*Prompt
 	metrics   map[string]uint64
 	memoryBus       []byte
@@ -136,12 +196,26 @@ type Controller struct {
 	ledger    []*LedgerBlock
 	knowledge map[string]string // Materialized state from ledger
 
+	// Neural Sessions
+	neuralSessions map[string]*TrainingSessionState
+
+	// Sovereign City
+	citizens map[string]*Citizen
+
 	storageBucket string
 	projectID     string
 	location      string
 	startTime     time.Time
 
 	grpcServer *grpc.Server
+
+	// Ouroboros Sentinel & Self-Healing
+	sentinelActive bool
+	watchlist      map[string]string // process_name -> command to start
+
+	// RADIUS AAAA Integration
+	radiusSecret string
+	radiusServer string
 
 	// Channels for internal orchestration
 	tasks    chan string

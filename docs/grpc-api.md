@@ -14,7 +14,7 @@ This document specifies the bidirectional remote execution protocols, socket con
 
 ## 🛠️ Protobuf Service Specifications
 
-The [sync.proto](file:///home/aellok/sovereign_mesh/proto/sync.proto) schema declares core RPC endpoints for control, memory, and native tool-use:
+The [sync.proto](file:///home/aellok/sovereign_mesh/proto/sync.proto) schema declares five core RPC endpoints:
 
 ```protobuf
 service AgentSync {
@@ -32,15 +32,6 @@ service AgentSync {
 
     // 5. JetWeb Time Machine RetroactiveTimeline Override
     rpc TimeTravelOverride (TimeTravelRequest) returns (TimeTravelResponse);
-}
-
-// AgentToolUse Service for Native Tooling
-service AgentToolUse {
-    rpc ExecuteFilesystem(FilesystemRequest) returns (FilesystemResponse);
-    rpc ExecuteWebAccess(WebAccessRequest) returns (WebAccessResponse);
-    rpc ExecuteWikipedia(WikipediaRequest) returns (WikipediaResponse);
-    rpc ExecuteBrowserAuth(BrowserAuthRequest) returns (BrowserAuthResponse);
-    rpc ExecuteKeepAlive(KeepAliveRequest) returns (KeepAliveResponse);
 }
 ```
 

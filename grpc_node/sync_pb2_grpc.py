@@ -39,8 +39,8 @@ class AgentSyncStub(object):
                 request_serializer=sync__pb2.PingRequest.SerializeToString,
                 response_deserializer=sync__pb2.PingResponse.FromString,
                 _registered_method=True)
-        self.SyncState = channel.unary_unary(
-                '/proto.AgentSync/SyncState',
+        self.HandshakeState = channel.unary_unary(
+                '/proto.AgentSync/HandshakeState',
                 request_serializer=sync__pb2.StatePayload.SerializeToString,
                 response_deserializer=sync__pb2.SyncAck.FromString,
                 _registered_method=True)
@@ -53,6 +53,31 @@ class AgentSyncStub(object):
                 '/proto.AgentSync/RemoteExecute',
                 request_serializer=sync__pb2.CommandPayload.SerializeToString,
                 response_deserializer=sync__pb2.CommandResult.FromString,
+                _registered_method=True)
+        self.ExecuteStrike = channel.unary_unary(
+                '/proto.AgentSync/ExecuteStrike',
+                request_serializer=sync__pb2.StrikeRequest.SerializeToString,
+                response_deserializer=sync__pb2.StrikeResponse.FromString,
+                _registered_method=True)
+        self.StreamVitality = channel.unary_stream(
+                '/proto.AgentSync/StreamVitality',
+                request_serializer=sync__pb2.TelemetryRequest.SerializeToString,
+                response_deserializer=sync__pb2.TelemetryData.FromString,
+                _registered_method=True)
+        self.SyncBlackhole = channel.stream_stream(
+                '/proto.AgentSync/SyncBlackhole',
+                request_serializer=sync__pb2.BlackholeUpdate.SerializeToString,
+                response_deserializer=sync__pb2.BlackholeUpdate.FromString,
+                _registered_method=True)
+        self.ExecuteShell = channel.unary_unary(
+                '/proto.AgentSync/ExecuteShell',
+                request_serializer=sync__pb2.CommandPayload.SerializeToString,
+                response_deserializer=sync__pb2.CommandResult.FromString,
+                _registered_method=True)
+        self.StreamLogs = channel.unary_stream(
+                '/proto.AgentSync/StreamLogs',
+                request_serializer=sync__pb2.LogRequest.SerializeToString,
+                response_deserializer=sync__pb2.LogEntry.FromString,
                 _registered_method=True)
         self.CreateUser = channel.unary_unary(
                 '/proto.AgentSync/CreateUser',
@@ -89,6 +114,26 @@ class AgentSyncStub(object):
                 request_serializer=sync__pb2.PortBindingsRequest.SerializeToString,
                 response_deserializer=sync__pb2.PortBindingsResponse.FromString,
                 _registered_method=True)
+        self.ManageProcess = channel.unary_unary(
+                '/proto.AgentSync/ManageProcess',
+                request_serializer=sync__pb2.ProcessActionRequest.SerializeToString,
+                response_deserializer=sync__pb2.CommandResult.FromString,
+                _registered_method=True)
+        self.GetSystemMetrics = channel.unary_unary(
+                '/proto.AgentSync/GetSystemMetrics',
+                request_serializer=sync__pb2.SystemMetricsRequest.SerializeToString,
+                response_deserializer=sync__pb2.SystemMetricsResponse.FromString,
+                _registered_method=True)
+        self.TeleportProcess = channel.unary_unary(
+                '/proto.AgentSync/TeleportProcess',
+                request_serializer=sync__pb2.TeleportProcessRequest.SerializeToString,
+                response_deserializer=sync__pb2.TeleportProcessResponse.FromString,
+                _registered_method=True)
+        self.AtomicSwap = channel.unary_unary(
+                '/proto.AgentSync/AtomicSwap',
+                request_serializer=sync__pb2.AtomicSwapRequest.SerializeToString,
+                response_deserializer=sync__pb2.AtomicSwapResponse.FromString,
+                _registered_method=True)
         self.TeleportAgent = channel.unary_unary(
                 '/proto.AgentSync/TeleportAgent',
                 request_serializer=sync__pb2.TeleportRequest.SerializeToString,
@@ -119,6 +164,36 @@ class AgentSyncStub(object):
                 request_serializer=sync__pb2.ForensicRequest.SerializeToString,
                 response_deserializer=sync__pb2.ForensicResponse.FromString,
                 _registered_method=True)
+        self.GetStarchart = channel.unary_unary(
+                '/proto.AgentSync/GetStarchart',
+                request_serializer=sync__pb2.StarchartRequest.SerializeToString,
+                response_deserializer=sync__pb2.StarchartResponse.FromString,
+                _registered_method=True)
+        self.RecordAccounting = channel.unary_unary(
+                '/proto.AgentSync/RecordAccounting',
+                request_serializer=sync__pb2.AccountingRecord.SerializeToString,
+                response_deserializer=sync__pb2.SyncAck.FromString,
+                _registered_method=True)
+        self.ProvisionNode = channel.unary_unary(
+                '/proto.AgentSync/ProvisionNode',
+                request_serializer=sync__pb2.ProvisionNodeRequest.SerializeToString,
+                response_deserializer=sync__pb2.ProvisionNodeResponse.FromString,
+                _registered_method=True)
+        self.UpdateDNS = channel.unary_unary(
+                '/proto.AgentSync/UpdateDNS',
+                request_serializer=sync__pb2.DNSRequest.SerializeToString,
+                response_deserializer=sync__pb2.UserResponse.FromString,
+                _registered_method=True)
+        self.ManageTunnel = channel.unary_unary(
+                '/proto.AgentSync/ManageTunnel',
+                request_serializer=sync__pb2.TunnelRequest.SerializeToString,
+                response_deserializer=sync__pb2.UserResponse.FromString,
+                _registered_method=True)
+        self.CreateTicket = channel.unary_unary(
+                '/proto.AgentSync/CreateTicket',
+                request_serializer=sync__pb2.TicketRequest.SerializeToString,
+                response_deserializer=sync__pb2.UserResponse.FromString,
+                _registered_method=True)
 
 
 class AgentSyncServicer(object):
@@ -130,7 +205,7 @@ class AgentSyncServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def SyncState(self, request, context):
+    def HandshakeState(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -143,6 +218,38 @@ class AgentSyncServicer(object):
         raise NotImplementedError('Method not implemented!')
 
     def RemoteExecute(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ExecuteStrike(self, request, context):
+        """High-Priority Sovereign Operations (from Legacy Mesh)
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def StreamVitality(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def SyncBlackhole(self, request_iterator, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ExecuteShell(self, request, context):
+        """Remote Shell & Logging (from GShell)
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def StreamLogs(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -192,6 +299,32 @@ class AgentSyncServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def ManageProcess(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetSystemMetrics(self, request, context):
+        """Silicon & Hardware Telemetry RPCs
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def TeleportProcess(self, request, context):
+        """Process Migration & Accounting RPCs
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def AtomicSwap(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def TeleportAgent(self, request, context):
         """High-Speed Agent Migration (Virtual Travel) RPC
         """
@@ -232,6 +365,44 @@ class AgentSyncServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def GetStarchart(self, request, context):
+        """Starchart Unified Visualization RPCs
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def RecordAccounting(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ProvisionNode(self, request, context):
+        """Multi-Cloud Infrastructure Orchestration RPCs
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def UpdateDNS(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ManageTunnel(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def CreateTicket(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_AgentSyncServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -240,8 +411,8 @@ def add_AgentSyncServicer_to_server(servicer, server):
                     request_deserializer=sync__pb2.PingRequest.FromString,
                     response_serializer=sync__pb2.PingResponse.SerializeToString,
             ),
-            'SyncState': grpc.unary_unary_rpc_method_handler(
-                    servicer.SyncState,
+            'HandshakeState': grpc.unary_unary_rpc_method_handler(
+                    servicer.HandshakeState,
                     request_deserializer=sync__pb2.StatePayload.FromString,
                     response_serializer=sync__pb2.SyncAck.SerializeToString,
             ),
@@ -254,6 +425,31 @@ def add_AgentSyncServicer_to_server(servicer, server):
                     servicer.RemoteExecute,
                     request_deserializer=sync__pb2.CommandPayload.FromString,
                     response_serializer=sync__pb2.CommandResult.SerializeToString,
+            ),
+            'ExecuteStrike': grpc.unary_unary_rpc_method_handler(
+                    servicer.ExecuteStrike,
+                    request_deserializer=sync__pb2.StrikeRequest.FromString,
+                    response_serializer=sync__pb2.StrikeResponse.SerializeToString,
+            ),
+            'StreamVitality': grpc.unary_stream_rpc_method_handler(
+                    servicer.StreamVitality,
+                    request_deserializer=sync__pb2.TelemetryRequest.FromString,
+                    response_serializer=sync__pb2.TelemetryData.SerializeToString,
+            ),
+            'SyncBlackhole': grpc.stream_stream_rpc_method_handler(
+                    servicer.SyncBlackhole,
+                    request_deserializer=sync__pb2.BlackholeUpdate.FromString,
+                    response_serializer=sync__pb2.BlackholeUpdate.SerializeToString,
+            ),
+            'ExecuteShell': grpc.unary_unary_rpc_method_handler(
+                    servicer.ExecuteShell,
+                    request_deserializer=sync__pb2.CommandPayload.FromString,
+                    response_serializer=sync__pb2.CommandResult.SerializeToString,
+            ),
+            'StreamLogs': grpc.unary_stream_rpc_method_handler(
+                    servicer.StreamLogs,
+                    request_deserializer=sync__pb2.LogRequest.FromString,
+                    response_serializer=sync__pb2.LogEntry.SerializeToString,
             ),
             'CreateUser': grpc.unary_unary_rpc_method_handler(
                     servicer.CreateUser,
@@ -290,6 +486,26 @@ def add_AgentSyncServicer_to_server(servicer, server):
                     request_deserializer=sync__pb2.PortBindingsRequest.FromString,
                     response_serializer=sync__pb2.PortBindingsResponse.SerializeToString,
             ),
+            'ManageProcess': grpc.unary_unary_rpc_method_handler(
+                    servicer.ManageProcess,
+                    request_deserializer=sync__pb2.ProcessActionRequest.FromString,
+                    response_serializer=sync__pb2.CommandResult.SerializeToString,
+            ),
+            'GetSystemMetrics': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetSystemMetrics,
+                    request_deserializer=sync__pb2.SystemMetricsRequest.FromString,
+                    response_serializer=sync__pb2.SystemMetricsResponse.SerializeToString,
+            ),
+            'TeleportProcess': grpc.unary_unary_rpc_method_handler(
+                    servicer.TeleportProcess,
+                    request_deserializer=sync__pb2.TeleportProcessRequest.FromString,
+                    response_serializer=sync__pb2.TeleportProcessResponse.SerializeToString,
+            ),
+            'AtomicSwap': grpc.unary_unary_rpc_method_handler(
+                    servicer.AtomicSwap,
+                    request_deserializer=sync__pb2.AtomicSwapRequest.FromString,
+                    response_serializer=sync__pb2.AtomicSwapResponse.SerializeToString,
+            ),
             'TeleportAgent': grpc.unary_unary_rpc_method_handler(
                     servicer.TeleportAgent,
                     request_deserializer=sync__pb2.TeleportRequest.FromString,
@@ -319,6 +535,36 @@ def add_AgentSyncServicer_to_server(servicer, server):
                     servicer.ForensicAudit,
                     request_deserializer=sync__pb2.ForensicRequest.FromString,
                     response_serializer=sync__pb2.ForensicResponse.SerializeToString,
+            ),
+            'GetStarchart': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetStarchart,
+                    request_deserializer=sync__pb2.StarchartRequest.FromString,
+                    response_serializer=sync__pb2.StarchartResponse.SerializeToString,
+            ),
+            'RecordAccounting': grpc.unary_unary_rpc_method_handler(
+                    servicer.RecordAccounting,
+                    request_deserializer=sync__pb2.AccountingRecord.FromString,
+                    response_serializer=sync__pb2.SyncAck.SerializeToString,
+            ),
+            'ProvisionNode': grpc.unary_unary_rpc_method_handler(
+                    servicer.ProvisionNode,
+                    request_deserializer=sync__pb2.ProvisionNodeRequest.FromString,
+                    response_serializer=sync__pb2.ProvisionNodeResponse.SerializeToString,
+            ),
+            'UpdateDNS': grpc.unary_unary_rpc_method_handler(
+                    servicer.UpdateDNS,
+                    request_deserializer=sync__pb2.DNSRequest.FromString,
+                    response_serializer=sync__pb2.UserResponse.SerializeToString,
+            ),
+            'ManageTunnel': grpc.unary_unary_rpc_method_handler(
+                    servicer.ManageTunnel,
+                    request_deserializer=sync__pb2.TunnelRequest.FromString,
+                    response_serializer=sync__pb2.UserResponse.SerializeToString,
+            ),
+            'CreateTicket': grpc.unary_unary_rpc_method_handler(
+                    servicer.CreateTicket,
+                    request_deserializer=sync__pb2.TicketRequest.FromString,
+                    response_serializer=sync__pb2.UserResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -359,7 +605,7 @@ class AgentSync(object):
             _registered_method=True)
 
     @staticmethod
-    def SyncState(request,
+    def HandshakeState(request,
             target,
             options=(),
             channel_credentials=None,
@@ -372,7 +618,7 @@ class AgentSync(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/proto.AgentSync/SyncState',
+            '/proto.AgentSync/HandshakeState',
             sync__pb2.StatePayload.SerializeToString,
             sync__pb2.SyncAck.FromString,
             options,
@@ -429,6 +675,141 @@ class AgentSync(object):
             '/proto.AgentSync/RemoteExecute',
             sync__pb2.CommandPayload.SerializeToString,
             sync__pb2.CommandResult.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ExecuteStrike(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/proto.AgentSync/ExecuteStrike',
+            sync__pb2.StrikeRequest.SerializeToString,
+            sync__pb2.StrikeResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def StreamVitality(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_stream(
+            request,
+            target,
+            '/proto.AgentSync/StreamVitality',
+            sync__pb2.TelemetryRequest.SerializeToString,
+            sync__pb2.TelemetryData.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def SyncBlackhole(request_iterator,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.stream_stream(
+            request_iterator,
+            target,
+            '/proto.AgentSync/SyncBlackhole',
+            sync__pb2.BlackholeUpdate.SerializeToString,
+            sync__pb2.BlackholeUpdate.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ExecuteShell(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/proto.AgentSync/ExecuteShell',
+            sync__pb2.CommandPayload.SerializeToString,
+            sync__pb2.CommandResult.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def StreamLogs(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_stream(
+            request,
+            target,
+            '/proto.AgentSync/StreamLogs',
+            sync__pb2.LogRequest.SerializeToString,
+            sync__pb2.LogEntry.FromString,
             options,
             channel_credentials,
             insecure,
@@ -629,6 +1010,114 @@ class AgentSync(object):
             _registered_method=True)
 
     @staticmethod
+    def ManageProcess(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/proto.AgentSync/ManageProcess',
+            sync__pb2.ProcessActionRequest.SerializeToString,
+            sync__pb2.CommandResult.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetSystemMetrics(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/proto.AgentSync/GetSystemMetrics',
+            sync__pb2.SystemMetricsRequest.SerializeToString,
+            sync__pb2.SystemMetricsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def TeleportProcess(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/proto.AgentSync/TeleportProcess',
+            sync__pb2.TeleportProcessRequest.SerializeToString,
+            sync__pb2.TeleportProcessResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def AtomicSwap(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/proto.AgentSync/AtomicSwap',
+            sync__pb2.AtomicSwapRequest.SerializeToString,
+            sync__pb2.AtomicSwapResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
     def TeleportAgent(request,
             target,
             options=(),
@@ -780,6 +1269,168 @@ class AgentSync(object):
             '/proto.AgentSync/ForensicAudit',
             sync__pb2.ForensicRequest.SerializeToString,
             sync__pb2.ForensicResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetStarchart(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/proto.AgentSync/GetStarchart',
+            sync__pb2.StarchartRequest.SerializeToString,
+            sync__pb2.StarchartResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def RecordAccounting(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/proto.AgentSync/RecordAccounting',
+            sync__pb2.AccountingRecord.SerializeToString,
+            sync__pb2.SyncAck.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ProvisionNode(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/proto.AgentSync/ProvisionNode',
+            sync__pb2.ProvisionNodeRequest.SerializeToString,
+            sync__pb2.ProvisionNodeResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def UpdateDNS(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/proto.AgentSync/UpdateDNS',
+            sync__pb2.DNSRequest.SerializeToString,
+            sync__pb2.UserResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ManageTunnel(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/proto.AgentSync/ManageTunnel',
+            sync__pb2.TunnelRequest.SerializeToString,
+            sync__pb2.UserResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def CreateTicket(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/proto.AgentSync/CreateTicket',
+            sync__pb2.TicketRequest.SerializeToString,
+            sync__pb2.UserResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -1027,6 +1678,446 @@ class AgentToolUse(object):
             '/proto.AgentToolUse/ExecuteKeepAlive',
             sync__pb2.KeepAliveRequest.SerializeToString,
             sync__pb2.KeepAliveResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+
+class NeuralTrainingStub(object):
+    """NeuralTransition & Self-Training Service
+    """
+
+    def __init__(self, channel):
+        """Constructor.
+
+        Args:
+            channel: A grpc.Channel.
+        """
+        self.InitiateTraining = channel.unary_unary(
+                '/proto.NeuralTraining/InitiateTraining',
+                request_serializer=sync__pb2.TrainingRequest.SerializeToString,
+                response_deserializer=sync__pb2.TrainingSession.FromString,
+                _registered_method=True)
+        self.GetTrainingStatus = channel.unary_unary(
+                '/proto.NeuralTraining/GetTrainingStatus',
+                request_serializer=sync__pb2.TrainingStatusRequest.SerializeToString,
+                response_deserializer=sync__pb2.TrainingStatus.FromString,
+                _registered_method=True)
+
+
+class NeuralTrainingServicer(object):
+    """NeuralTransition & Self-Training Service
+    """
+
+    def InitiateTraining(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetTrainingStatus(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+
+def add_NeuralTrainingServicer_to_server(servicer, server):
+    rpc_method_handlers = {
+            'InitiateTraining': grpc.unary_unary_rpc_method_handler(
+                    servicer.InitiateTraining,
+                    request_deserializer=sync__pb2.TrainingRequest.FromString,
+                    response_serializer=sync__pb2.TrainingSession.SerializeToString,
+            ),
+            'GetTrainingStatus': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetTrainingStatus,
+                    request_deserializer=sync__pb2.TrainingStatusRequest.FromString,
+                    response_serializer=sync__pb2.TrainingStatus.SerializeToString,
+            ),
+    }
+    generic_handler = grpc.method_handlers_generic_handler(
+            'proto.NeuralTraining', rpc_method_handlers)
+    server.add_generic_rpc_handlers((generic_handler,))
+    server.add_registered_method_handlers('proto.NeuralTraining', rpc_method_handlers)
+
+
+ # This class is part of an EXPERIMENTAL API.
+class NeuralTraining(object):
+    """NeuralTransition & Self-Training Service
+    """
+
+    @staticmethod
+    def InitiateTraining(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/proto.NeuralTraining/InitiateTraining',
+            sync__pb2.TrainingRequest.SerializeToString,
+            sync__pb2.TrainingSession.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetTrainingStatus(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/proto.NeuralTraining/GetTrainingStatus',
+            sync__pb2.TrainingStatusRequest.SerializeToString,
+            sync__pb2.TrainingStatus.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+
+class SovereignCityStub(object):
+    """Sovereign City Protocol Service
+    """
+
+    def __init__(self, channel):
+        """Constructor.
+
+        Args:
+            channel: A grpc.Channel.
+        """
+        self.RegisterCitizen = channel.unary_unary(
+                '/proto.SovereignCity/RegisterCitizen',
+                request_serializer=sync__pb2.CitizenRegistration.SerializeToString,
+                response_deserializer=sync__pb2.CitizenPassport.FromString,
+                _registered_method=True)
+        self.RequestService = channel.unary_unary(
+                '/proto.SovereignCity/RequestService',
+                request_serializer=sync__pb2.ServiceRequest.SerializeToString,
+                response_deserializer=sync__pb2.ServiceAllocation.FromString,
+                _registered_method=True)
+        self.GetCitizenStatus = channel.unary_unary(
+                '/proto.SovereignCity/GetCitizenStatus',
+                request_serializer=sync__pb2.CitizenStatusRequest.SerializeToString,
+                response_deserializer=sync__pb2.CitizenStatusResponse.FromString,
+                _registered_method=True)
+
+
+class SovereignCityServicer(object):
+    """Sovereign City Protocol Service
+    """
+
+    def RegisterCitizen(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def RequestService(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetCitizenStatus(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+
+def add_SovereignCityServicer_to_server(servicer, server):
+    rpc_method_handlers = {
+            'RegisterCitizen': grpc.unary_unary_rpc_method_handler(
+                    servicer.RegisterCitizen,
+                    request_deserializer=sync__pb2.CitizenRegistration.FromString,
+                    response_serializer=sync__pb2.CitizenPassport.SerializeToString,
+            ),
+            'RequestService': grpc.unary_unary_rpc_method_handler(
+                    servicer.RequestService,
+                    request_deserializer=sync__pb2.ServiceRequest.FromString,
+                    response_serializer=sync__pb2.ServiceAllocation.SerializeToString,
+            ),
+            'GetCitizenStatus': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetCitizenStatus,
+                    request_deserializer=sync__pb2.CitizenStatusRequest.FromString,
+                    response_serializer=sync__pb2.CitizenStatusResponse.SerializeToString,
+            ),
+    }
+    generic_handler = grpc.method_handlers_generic_handler(
+            'proto.SovereignCity', rpc_method_handlers)
+    server.add_generic_rpc_handlers((generic_handler,))
+    server.add_registered_method_handlers('proto.SovereignCity', rpc_method_handlers)
+
+
+ # This class is part of an EXPERIMENTAL API.
+class SovereignCity(object):
+    """Sovereign City Protocol Service
+    """
+
+    @staticmethod
+    def RegisterCitizen(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/proto.SovereignCity/RegisterCitizen',
+            sync__pb2.CitizenRegistration.SerializeToString,
+            sync__pb2.CitizenPassport.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def RequestService(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/proto.SovereignCity/RequestService',
+            sync__pb2.ServiceRequest.SerializeToString,
+            sync__pb2.ServiceAllocation.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetCitizenStatus(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/proto.SovereignCity/GetCitizenStatus',
+            sync__pb2.CitizenStatusRequest.SerializeToString,
+            sync__pb2.CitizenStatusResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+
+class ArtistDAOStub(object):
+    """Artist DAO Marketplace
+    """
+
+    def __init__(self, channel):
+        """Constructor.
+
+        Args:
+            channel: A grpc.Channel.
+        """
+        self.MintArt = channel.unary_unary(
+                '/proto.ArtistDAO/MintArt',
+                request_serializer=sync__pb2.MintRequest.SerializeToString,
+                response_deserializer=sync__pb2.ArtAsset.FromString,
+                _registered_method=True)
+        self.ListArt = channel.unary_unary(
+                '/proto.ArtistDAO/ListArt',
+                request_serializer=sync__pb2.ListRequest.SerializeToString,
+                response_deserializer=sync__pb2.MarketplaceListing.FromString,
+                _registered_method=True)
+        self.BuyArt = channel.unary_unary(
+                '/proto.ArtistDAO/BuyArt',
+                request_serializer=sync__pb2.BuyRequest.SerializeToString,
+                response_deserializer=sync__pb2.TransactionReceipt.FromString,
+                _registered_method=True)
+
+
+class ArtistDAOServicer(object):
+    """Artist DAO Marketplace
+    """
+
+    def MintArt(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ListArt(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def BuyArt(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+
+def add_ArtistDAOServicer_to_server(servicer, server):
+    rpc_method_handlers = {
+            'MintArt': grpc.unary_unary_rpc_method_handler(
+                    servicer.MintArt,
+                    request_deserializer=sync__pb2.MintRequest.FromString,
+                    response_serializer=sync__pb2.ArtAsset.SerializeToString,
+            ),
+            'ListArt': grpc.unary_unary_rpc_method_handler(
+                    servicer.ListArt,
+                    request_deserializer=sync__pb2.ListRequest.FromString,
+                    response_serializer=sync__pb2.MarketplaceListing.SerializeToString,
+            ),
+            'BuyArt': grpc.unary_unary_rpc_method_handler(
+                    servicer.BuyArt,
+                    request_deserializer=sync__pb2.BuyRequest.FromString,
+                    response_serializer=sync__pb2.TransactionReceipt.SerializeToString,
+            ),
+    }
+    generic_handler = grpc.method_handlers_generic_handler(
+            'proto.ArtistDAO', rpc_method_handlers)
+    server.add_generic_rpc_handlers((generic_handler,))
+    server.add_registered_method_handlers('proto.ArtistDAO', rpc_method_handlers)
+
+
+ # This class is part of an EXPERIMENTAL API.
+class ArtistDAO(object):
+    """Artist DAO Marketplace
+    """
+
+    @staticmethod
+    def MintArt(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/proto.ArtistDAO/MintArt',
+            sync__pb2.MintRequest.SerializeToString,
+            sync__pb2.ArtAsset.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ListArt(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/proto.ArtistDAO/ListArt',
+            sync__pb2.ListRequest.SerializeToString,
+            sync__pb2.MarketplaceListing.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def BuyArt(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/proto.ArtistDAO/BuyArt',
+            sync__pb2.BuyRequest.SerializeToString,
+            sync__pb2.TransactionReceipt.FromString,
             options,
             channel_credentials,
             insecure,

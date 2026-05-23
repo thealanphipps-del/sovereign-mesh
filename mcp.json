@@ -1,8 +1,10 @@
 {
   "mcpServers": {
     "sovereign-native-tools": {
-      "command": "python3",
-      "args": ["/home/aellok/billing/sovereign_mesh/grpc_node/grpc_server.py", "--native-mcp"]
+      "command": "/home/aellok/sovereign_mesh/.venv/bin/python3",
+      "args": [
+        "/home/aellok/sovereign_mesh/grpc_node/mgsh_mcp.py"
+      ]
     }
   }
 }

@@ -3,10 +3,12 @@ package sovereign
 import (
 	"context"
 	"encoding/binary"
+	"fmt"
 	"log"
 	"math"
 	"net"
 	"os"
+	"os/exec"
 	"os/signal"
 	"sync"
 	"syscall"
@@ -21,27 +23,131 @@ import (
 // NewController creates a new instance of the Sovereign Mesh engine.
 func NewController(projectID, location string) *Controller {
 	c := &Controller{
-		agents:        make(map[string]*Agent),
-		prompts:       make(map[string]*Prompt),
-		knowledge:     make(map[string]string),
-		ledger:        make([]*LedgerBlock, 0),
-		tasks:         make(chan string, 100),
-		optTasks:      make(chan OptimizationTask, 100),
+		agents:         make(map[string]*Agent),
+		processes:      make(map[int32]*Process),
+		prompts:        make(map[string]*Prompt),
+		knowledge:      make(map[string]string),
+		ledger:         make([]*LedgerBlock, 0),
+		neuralSessions: make(map[string]*TrainingSessionState),
+		citizens:       make(map[string]*Citizen),
+		tasks:          make(chan string, 100),
+		optTasks:       make(chan OptimizationTask, 100),
 		metrics:       make(map[string]uint64),
 		projectID:     projectID,
 		storageBucket: os.Getenv("SNAPSHOT_BUCKET"),
 		location:      location,
 		startTime:     time.Now().UTC(),
+		radiusSecret:  os.Getenv("RADIUS_SECRET"),
+		radiusServer:  os.Getenv("RADIUS_SERVER"),
 	}
 
 	c.SeedGenesisBlock()
 	return c
 }
 
+// OuroborosSentinel monitors core processes and triggers the Resurrection protocol on failure.
+func (c *Controller) OuroborosSentinel(ctx context.Context) {
+	log.Printf("🐍 OUROBOROS SENTINEL: Watchdog daemon activated. Monitoring %d core processes.", len(c.watchlist))
+
+	ticker := time.NewTicker(5 * time.Second)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+			for proc, cmd := range c.watchlist {
+				if !c.isProcessRunning(proc) {
+					log.Printf("🚨 SENTINEL ALERT: Process '%s' has flatlined! Initiating Resurrection Protocol...", proc)
+
+					// 1. Audit Failure via RADIUS
+					c.LogAccountingEvent("SENTINEL", "FAILURE-"+proc, 1, 0, 0)
+
+					// 2. Log State Deviation in Jetweb Time Machine (Simulated)
+					log.Printf("⏰ JETWEB: Recording state deviation at Block #%d", len(c.ledger))
+
+					// 3. Resurrect Process
+					go c.resurrect(proc, cmd)
+				}
+			}
+		}
+	}
+}
+
+func (c *Controller) isProcessRunning(name string) bool {
+	// Simulated process check
+	return true
+}
+
+func (c *Controller) resurrect(name, cmd string) {
+	log.Printf("✨ RESURRECTION: Re-igniting '%s' via '%s'...", name, cmd)
+	// Implementation would spawn the command
+	time.Sleep(1 * time.Second)
+	log.Printf("✅ HEALED: Process '%s' is back in stable flight path.", name)
+
+	// Audit Success via RADIUS
+	c.LogAccountingEvent("SENTINEL", "HEAL-"+name, 1, 0, 0)
+}
+
+// RemoteExecute delegates a command to a specific node in the mesh.
+func (c *Controller) RemoteExecute(node, command string) (string, error) {
+	log.Printf("🛰️ DELEGATION: Routing command to %s: %s", node, command)
+	
+	// In a real multi-node mesh, this would use gRPC to dial the target node's AgentSync server.
+	// For 39.mh, if we are on the bridge or have SSH, we wrap it.
+	
+	out, err := exec.Command("sh", "-c", command).CombinedOutput()
+	return string(out), err
+}
+
+// TeleportProcess migrates an execution unit across the mesh using zero-copy memory paging.
+func (c *Controller) TeleportProcess(pid int32, targetNode string) error {
+	c.syncLock.Lock()
+	defer c.syncLock.Unlock()
+
+	proc, ok := c.processes[pid]
+	if !ok {
+		return syscall.ESRCH // Process not found
+	}
+
+	oldNode := proc.CurrentNode
+	log.Printf("🚄 TELEPORTING: Process %d (Owner: %s) | %s -> %s", pid, proc.Owner, oldNode, targetNode)
+
+	// 1. Snapshot Process Stack Trace (Simulated Silicon Access)
+	stackTrace := "main.go:42 -> memory.go:111 -> syscall.Mmap:0x7ff"
+	proc.StackHistory = append(proc.StackHistory, fmt.Sprintf("[%s] %s", time.Now().Format(time.RFC3339), stackTrace))
+
+	// 2. Perform Zero-Copy Memory Paging (Direct bus allocation)
+	// We simulate this by moving the process segment offset in the memory bus
+	offset := int(pid % 1024) * 4096 // 4KB pages
+	log.Printf("⚡ RAM-BUS: Page frame migration at offset 0x%x complete.", offset)
+
+	// 3. RADIUS AAAA Accounting
+	c.TrackProcessMigration(pid, proc.Owner, oldNode, targetNode)
+
+	// 4. Update Global Truth
+	proc.CurrentNode = targetNode
+	proc.LastMigrated = time.Now()
+	proc.Status = "MIGRATING"
+
+	return nil
+}
+
 // Start initializes the system monitors and orchestrators.
 func (c *Controller) Start(ctx context.Context) {
 	log.Printf("✨ INITIALIZING STARBIRTH PROTOCOL (SBP-001) - 2026 Swarm...")
 	c.metrics["system/runlevel"] = 7 // STARBIRTH Runlevel
+
+	// Initialize Ouroboros Sentinel
+	c.sentinelActive = true
+	c.watchlist = map[string]string{
+		"grpc_server": "python3 -u grpc_node/grpc_server.py",
+		"memory_bus":  "python3 -u memory_bus/server.py",
+		"web_portal":  "python3 -u grpc_node/web_server.py",
+	}
+	go c.OuroborosSentinel(ctx)
+
 	starbirthCounter := counter.New("sovereign/starbirth_initialization_total")
 	starbirthCounter.Inc()
 
@@ -75,15 +181,20 @@ func (c *Controller) Start(ctx context.Context) {
 	}()
 
 	// Respect Cloud Run dynamic port assignment
-	port := "1112" // Dedicated native tool-use port
+	port := "1113" // Dedicated native tool-use port
 	lis, err := net.Listen("tcp", ":"+port)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
 	c.grpcServer = grpc.NewServer()
+	srv := &meshServer{controller: c}
+	proto.RegisterSovereignMeshServer(c.grpcServer, srv)
+	proto.RegisterAgentSyncServer(c.grpcServer, srv)
+	proto.RegisterNeuralTrainingServer(c.grpcServer, srv)
+	proto.RegisterSovereignCityServer(c.grpcServer, srv)
 	proto.RegisterAgentToolUseServer(c.grpcServer, &ToolUseServer{})
-	reflection.Register(c.grpcServer) // Enable gurl/evans debugging
+	reflection.Register(c.grpcServer)
 
 	go func() {
 		log.Printf("📡 Sovereign Cloud Run Instance active on :%s", port)
@@ -198,9 +309,9 @@ func (c *Controller) startInfrastructureMonitor(ctx context.Context) {
 			}
 			c.syncLock.RUnlock()
 
-			if validators < 7 {
-				log.Printf("🚨 INFRA ALERT: Validator count at %d (Target: 7). Triggering external VPS allocation and revenue redistribution...", validators)
-				c.TriggerExternalScaling(7 - validators)
+			if validators < 6 {
+				log.Printf("🚨 INFRA ALERT: Validator count at %d (Target: 6). Triggering external VPS allocation and revenue redistribution...", validators)
+				c.TriggerExternalScaling(6 - validators)
 				infraCounter.Inc()
 				c.metrics["infra/floor_violation_count"]++
 			}

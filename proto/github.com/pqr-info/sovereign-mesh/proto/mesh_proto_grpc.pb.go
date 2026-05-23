@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.6.2
 // - protoc             v3.21.12
-// source: proto/mesh_proto.proto
+// source: mesh_proto.proto
 
 package proto
 
@@ -277,5 +277,5 @@ var SovereignMesh_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "proto/mesh_proto.proto",
+	Metadata: "mesh_proto.proto",
 }

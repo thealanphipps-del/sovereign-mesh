@@ -61,25 +61,3 @@ When consensus is achieved with a minority objection (e.g., 4/5 agreement), the 
 ```
 
 This research matrix simulates operational side-effects, boundary deviances, and sandbox limitations, publishing a forensic objection review block alongside the committed blockchain block, ensuring full transparency in swarm decision-making.
-
----
-
-## 🛠️ Native Tool-Use Plane
-
-The Sovereign Mesh has evolved from relying on external tool-use proxies (MCP) to a native, high-performance **AgentToolUse Plane**. This plane is integrated directly into the Go-based control plane, eliminating external dependencies and enabling tighter security and auditing for agent actions.
-
-### Core Tooling Capabilities:
-*   **Filesystem Access:** Native Read/List/Write operations secured within the agent's permission boundary.
-*   **Web Access:** High-performance, low-latency web fetching directly from the mesh controller.
-*   **Wikipedia Integration:** Automated, context-aware Wikipedia summary extraction via native API client.
-*   **Persistent Auth Agent:** Integration of a headless browser (via `go-rod`) designed to reuse existing authenticated user profiles (e.g., for Gemini/Google Auth) for persistent "break-glass" access, managed by the `ExecuteBrowserAuth` service.
-
----
-
-## 🚀 XDP Network Plane
-
-To achieve sub-microsecond telemetry signaling, the network plane has been upgraded to leverage **XDP (eXpress Data Path)** and **AF_XDP (Kernel Bypass)**.
-
-*   **eBPF Packet Processing:** Pre-compiled C-based BPF programs are injected into the NIC drivers to filter, drop, or redirect incoming mesh traffic *before* it reaches the standard Linux kernel network stack.
-*   **Zero-Copy Ingestion:** Traffic matching the Sovereign Mesh protocol is redirected via AF_XDP sockets directly into user-space ring buffers, eliminating the context-switching and buffer-copying overheads of standard socket-based networking.
-*   **User-Space Management:** The Go control plane utilizes the `cilium/ebpf` library for hot-loading and monitoring the BPF programs, ensuring maximum flexibility without compromising runtime performance.
