@@ -93,6 +93,25 @@ class AgentSyncServicer(sync_pb2_grpc.AgentSyncServicer):
         for k, v in request.metadata.items():
             log(f"  Meta: [{k}] -> {v}")
 
+        # Integrate and load Agentic Memory from RTGO database
+        try:
+            conn = sqlite3.connect(DB_PATH)
+            c = conn.cursor()
+            c.execute(
+                "SELECT ticket_id, Subject, Status, specialty, task_description, Created FROM tickets WHERE agent_id = ? ORDER BY Created DESC",
+                (request.agent_id,),
+            )
+            memories = c.fetchall()
+            conn.close()
+            if memories:
+                log(f"🧠 [AGENTIC MEMORY LOADED] Retrieved {len(memories)} memories for {request.agent_id} from RTGO ticketing system:", color=GREEN)
+                for idx, mem in enumerate(memories[:5]):  # Display top 5 most recent memories
+                    log(f"  ● Memory #{idx+1}: [{mem[3]}] {mem[4]} (Ticket #{mem[0]}, Status: {mem[2]}, Created: {mem[5]})", color=CYAN)
+            else:
+                log(f"🧠 [AGENTIC MEMORY] No prior memories found for {request.agent_id} in RTGO ticket system.", color=GOLD)
+        except Exception as e:
+            log(f"Failed to load agentic memory: {e}", color=RED)
+
         return sync_pb2.SyncAck(
             success=True,
             message="State integrated into mesh topology successfully",
@@ -1875,28 +1894,76 @@ RESEARCH SIMULATION MATRIX:
         )
 
     def CreateTicket(self, request, context):
+        import re
         ticket_id = request.ticket_id
         content = request.content
         log(f"🎫 TICKET CREATED: [{BOLD}{ticket_id}{RESET}] {content}", color=GOLD)
 
-        # Mirror to local SQLite and propose mutation to consensus (simulated)
+        # Extract agent_id from the TicketRequest dynamically
+        agent_id = None
+        for text in [request.ticket_id, request.ticket_type, request.path, request.content]:
+            match = re.search(r'(AGENT-\d{3})', text or '', re.IGNORECASE)
+            if match:
+                agent_id = match.group(1).upper()
+                break
+        if not agent_id:
+            agent_id = "SYSTEM"
+
+        # Mirror to local SQLite database with RT-compliant schema
         try:
             conn = sqlite3.connect(DB_PATH)
             c = conn.cursor()
+            ts_now = datetime.now().isoformat()
+            
+            queue = request.ticket_type if request.ticket_type else "Swarm-Memories"
+            subject = f"Memory: {request.ticket_id}" if request.ticket_id else "Agent Memory"
+            status = request.status if request.status else "new"
+            creator = agent_id
+            owner = agent_id
+            task_desc = request.content
+            specialty = request.ticket_type if request.ticket_type else "Agentic Memory"
+            
+            layer_level = 1
+            if agent_id.startswith("AGENT-"):
+                try:
+                    layer_level = int(agent_id.split("-")[1]) % 7 + 1
+                except:
+                    pass
+
             c.execute(
-                "INSERT OR REPLACE INTO tickets (ticket_id, ticket_type, content, path, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                """
+                INSERT INTO tickets (Queue, Subject, Status, Owner, Creator, Priority, TimeEstimated, TimeWorked, TimeLeft, Created, LastUpdated, LastUpdatedBy, agent_id, layer_level, specialty, task_description)
+                VALUES (?, ?, ?, ?, ?, 5, 0, 0, 0, ?, ?, ?, ?, ?, ?, ?)
+                """,
                 (
-                    ticket_id,
-                    request.ticket_type,
-                    content,
-                    request.path,
-                    request.status,
-                    datetime.now().isoformat(),
-                    datetime.now().isoformat(),
+                    queue,
+                    subject,
+                    status,
+                    owner,
+                    creator,
+                    ts_now,
+                    ts_now,
+                    creator,
+                    agent_id,
+                    layer_level,
+                    specialty,
+                    task_desc,
                 ),
             )
+            db_ticket_id = c.lastrowid
+            
+            # Record Ticket Creation Transaction
+            c.execute(
+                """
+                INSERT INTO transactions (ObjectType, ObjectId, TimeTaken, Type, Data, Creator, Created) 
+                VALUES ('RT::Ticket', ?, 0, 'Create', ?, ?, ?)
+                """,
+                (db_ticket_id, f"Agentic memory ticket created for {agent_id}", creator, ts_now),
+            )
+            
             conn.commit()
             conn.close()
+            log(f"✅ Ticket {db_ticket_id} (Memory for {agent_id}) successfully mirrored to RTGO database.", color=GREEN)
         except Exception as e:
             log(f"Ticket Sync Error: {e}", color=RED)
 

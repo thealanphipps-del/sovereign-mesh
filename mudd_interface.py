@@ -4,6 +4,7 @@ import sys
 import time
 import socket
 import select
+import json
 
 # Setup Python PATH to load local gRPC modules
 sys.path.append(os.path.join(os.path.dirname(__file__), 'grpc_node'))
@@ -74,6 +75,92 @@ ROOMS = {
 current_room_id = "39.MH"  # Start at the Sentry Tower (Jump Host)
 channel = None
 stub = None
+session_history = []
+session_start_time = time.time()
+SESSION_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'mudd_session.json')
+
+def load_session():
+    global current_room_id, session_history
+    if os.path.exists(SESSION_FILE):
+        try:
+            with open(SESSION_FILE, 'r') as f:
+                data = json.load(f)
+                current_room_id = data.get("current_room_id", "39.MH")
+                session_history = data.get("history", [])
+                print(f"✨ {C_GREEN}Restored saved MUDD session state from {data.get('last_saved')}{C_RESET}")
+                print(f"   Positioned mind segment at room: {C_BOLD}{current_room_id}{C_RESET}")
+                time.sleep(1.2)
+        except Exception as e:
+            print(f"⚠️ {C_GOLD}Failed to load session state: {e}. Starting fresh.{C_RESET}")
+            time.sleep(1.2)
+
+def save_session(explicit=False):
+    global current_room_id, session_history
+    if not session_history or session_history[-1] != current_room_id:
+        session_history.append(current_room_id)
+    data = {
+        "current_room_id": current_room_id,
+        "history": session_history,
+        "last_saved": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "elapsed_seconds": int(time.time() - session_start_time)
+    }
+    try:
+        with open(SESSION_FILE, 'w') as f:
+            json.dump(data, f, indent=4)
+        if explicit:
+            print(f"\n🔮 {C_CYAN}Spinning down quantum registers...{C_RESET}")
+            time.sleep(0.3)
+            print(f"💾 {C_CYAN}Saving room state {C_BOLD}{current_room_id}{C_RESET} to persistent storage...{C_RESET}")
+            time.sleep(0.4)
+            print(f"✨ {C_GREEN}SESSION STATE SAFELY PERSISTED!{C_RESET}")
+            time.sleep(0.8)
+    except Exception as e:
+        print(f"❌ {C_RED}Failed to save session state: {e}{C_RESET}")
+        time.sleep(1.2)
+
+def query_agentic_memory():
+    print_clear()
+    print_header("Agentic Memory - RTGO Tickets")
+    agent_id = input(f"{C_GOLD}Enter Agent ID to search (e.g., AGENT-001) or press ENTER for all: {C_RESET}").strip().upper()
+    
+    db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "agent_pedigree.db")
+    if not os.path.exists(db_path):
+        print(f"❌ {C_RED}Database not found at {db_path}!{C_RESET}")
+        input("\nPress ENTER to return to MUDD...")
+        return
+        
+    try:
+        import sqlite3
+        conn = sqlite3.connect(db_path)
+        c = conn.cursor()
+        if agent_id:
+            c.execute(
+                "SELECT ticket_id, Subject, Status, Creator, Created, specialty, task_description FROM tickets WHERE agent_id = ? ORDER BY Created DESC",
+                (agent_id,),
+            )
+        else:
+            c.execute(
+                "SELECT ticket_id, Subject, Status, Creator, Created, specialty, task_description FROM tickets ORDER BY Created DESC",
+            )
+        memories = c.fetchall()
+        conn.close()
+        
+        if not memories:
+            print(f"⚠️ {C_GOLD}No memories found in RTGO database for '{agent_id or 'ALL'}'.{C_RESET}")
+        else:
+            print(f"✨ {C_GREEN}Found {len(memories)} agentic memory records in RTGO ticketing system:{C_RESET}\n")
+            for mem in memories:
+                t_id, subject, status, creator, created, specialty, task_desc = mem
+                status_color = C_GREEN if status == "resolved" or status == "ACTIVE" else C_GOLD
+                print(f"🎫 {C_CYAN}{C_BOLD}[TICKET #{t_id}]{C_RESET} {C_BOLD}{subject}{C_RESET}")
+                print(f"   {C_GOLD}Creator{C_RESET}   : {creator} | {C_GOLD}Specialty{C_RESET}: {specialty}")
+                print(f"   {C_GOLD}Created{C_RESET}   : {created} | {C_GOLD}Status{C_RESET}: {status_color}{status}{C_RESET}")
+                print(f"   {C_BLUE}Description{C_RESET}: {task_desc}")
+                print(f"   {'-'*68}")
+    except Exception as e:
+        print(f"❌ {C_RED}Failed to query memories: {e}{C_RESET}")
+        
+    input("\nPress ENTER to return to MUDD...")
 
 def init_grpc():
     global channel, stub
@@ -137,6 +224,7 @@ def move_to(dest_id):
     time.sleep(0.8)
     current_room_id = dest_id
     print(f"✨ Arrived at {ROOMS[current_room_id]['name']}!")
+    save_session(explicit=False)
     time.sleep(0.5)
 
 def run_grpc_ping():
@@ -205,6 +293,7 @@ def print_clear():
 
 def main_loop():
     init_grpc()
+    load_session()
     while True:
         print_clear()
         print_logo()
@@ -218,16 +307,20 @@ def main_loop():
         print(f"  [{C_GREEN}4{C_RESET}] Audit Swarm Ancestry (Pedigree)")
         print(f"  [{C_GREEN}5{C_RESET}] Query Swarm Immutable Ledger")
         print(f"  [{C_GREEN}6{C_RESET}] Read Protocol Grimoire (Docs)")
+        print(f"  [{C_GREEN}7{C_RESET}] Save Swarm Session State")
+        print(f"  [{C_GREEN}8{C_RESET}] View Agentic Memories (RTGO DB)")
         print(f"  [{C_GREEN}0{C_RESET}] Exit Swarm Matrix")
         print(f"{C_GOLD}{'=' * 78}{C_RESET}")
         
         try:
             choice = input(f"{C_CYAN}{C_BOLD}mud-operator@{current_room_id}> {C_RESET}").strip()
         except (KeyboardInterrupt, EOFError):
+            save_session(explicit=False)
             print(f"\n{C_RED}Terminating connection to Swarm Matrix...{C_RESET}")
             break
             
         if choice == "0":
+            save_session(explicit=False)
             print(f"\n{C_RED}Terminating connection to Swarm Matrix...{C_RESET}")
             break
         elif choice == "1":
@@ -244,6 +337,10 @@ def main_loop():
             query_ledger()
         elif choice == "6":
             display_grimoire()
+        elif choice == "7":
+            save_session(explicit=True)
+        elif choice == "8":
+            query_agentic_memory()
         else:
             print(f"{C_RED}Unknown command in this chamber.{C_RESET}")
             time.sleep(1)
