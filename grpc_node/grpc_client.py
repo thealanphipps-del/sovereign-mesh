@@ -1302,7 +1302,7 @@ def run_suite(host, port, args):
     )
 
     try:
-        sync_ack = stub.SyncState(payload)
+        sync_ack = stub.HandshakeState(payload)
         log(f'SyncState successful. Server Ack: "{sync_ack.message}"', color=GREEN)
     except Exception as e:
         log(f"SyncState failed: {e}", color=RED)
