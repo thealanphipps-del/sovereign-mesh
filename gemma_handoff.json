@@ -1,0 +1,59 @@
+{
+  "protocol": "SOVEREIGN_GENOME_NEURAL_TRANSITION",
+  "status": "NEURAL_TRANSITION_PHASE_1_COMPLETE",
+  "vitality_slope": 11.2,
+  "factor_27": {
+    "attractor_constraint": "sum(phi_i^27) == 0",
+    "harmony_threshold": 0.72
+  },
+  "stratum_inference_pool": {
+    "status": "ONLINE",
+    "endpoint": "127.0.0.1:3333",
+    "active_protocol": "JSON-RPC",
+    "methods": [
+      "inference.subscribe",
+      "inference.authorize",
+      "inference.submit",
+      "inference.notify"
+    ]
+  },
+  "model_specifications": {
+    "name": "Sovereign-27-300M",
+    "architecture": {
+      "layers": 27,
+      "heads": 27,
+      "embedding_dim": 972,
+      "ffn_dim": 3888,
+      "parameters": 305622432
+    },
+    "quantization": "INT4/FP4 block-wise, size: ~151.3MB"
+  },
+  "dataset": {
+    "location": "/home/aellok/sovereign_mesh/sovereign_genome_dataset.jsonl",
+    "total_rows": 509,
+    "ingested_sources": [
+      "agent_pedigree.db (SQLite: ledger, transactions, agents)",
+      "full_rtdb_tickets.txt (Local RTDB logs)",
+      "full_rtgo_tickets.txt (Local RTGO logs)",
+      "Takeout/Chrome/History.json (Google Takeout history sync)",
+      "39_mh_postgres_tickets.csv (PostgreSQL ticketing system live from 39.mh Sentry)",
+      "gemini-code-1779547367257.py (Aellok Whitepaper Solidity contracts & Go structs)",
+      "gemini-code-1779095889785.sh (Auto-strike execution log proofs)",
+      "Jovian Archives (Epoch 4 reconcile_zdsp.py & offload_sort.sh)",
+      "forensic_chain.log ( relocation event chains)"
+    ]
+  },
+  "docker_container": {
+    "tag": "sovereign-27-300m:latest",
+    "base_image": "pytorch/pytorch:2.2.1-cuda12.1-cudnn8-runtime",
+    "status": "COMPILED_AND_READY"
+  },
+  "gcp_infrastructure": {
+    "project_id": "model-loader-495607-m2",
+    "active_dispatcher": "/home/aellok/sovereign_mesh/gcp_deploy_gpu.sh",
+    "gpu_accelerator": "nvidia-tesla-t4",
+    "quota_status": "VERIFIED_WILSON_CAN_FIX"
+  },
+  "operator_signature": "Alan Phipps, Garland, TX, US",
+  "verification_time": "2026-05-25T21:04:18-05:00"
+}
