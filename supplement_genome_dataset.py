@@ -101,6 +101,35 @@ if os.path.exists(strike_script_path):
         print(f"     [WARN] Error parsing strike script: {e}")
 
 # ==============================================================================
+# 3.5. PARSE POSTGRESQL TICKETS CSV FROM 39.MH (39_mh_postgres_tickets.csv)
+# ==============================================================================
+postgres_csv_path = "/home/aellok/sovereign_mesh/39_mh_postgres_tickets.csv"
+if os.path.exists(postgres_csv_path):
+    print("  -> Parsing 39_mh_postgres_tickets.csv (PostgreSQL database)...")
+    try:
+        import csv
+        with open(postgres_csv_path, "r", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            count = 0
+            for row in reader:
+                ticket_id = row.get("ticket_id")
+                ticket_type = row.get("ticket_type", "LEGACY_EVENT")
+                content = row.get("content", "")
+                path = row.get("path", "")
+                status = row.get("status", "CLOSED")
+                created_at = row.get("created_at", "")
+                
+                entry = {
+                    "input": f"POSTGRES_TICKET_INVESTIGATION: Inspecting 39.mh PostgreSQL ticket {ticket_id} | Type: {ticket_type} | Status: {status}",
+                    "output": f"POSTGRES_TICKET_STATE: Found ticket in active Helsinki sentry db:\nContent: {content}\nPath relation: {path}\nTimestamp: {created_at}\nGovernance verification: COMPLIANT AND SYNCED."
+                }
+                supplement_entries.append(entry)
+                count += 1
+        print(f"     ✅ Formatted {count} PostgreSQL database entries from 39.mh sentry.")
+    except Exception as e:
+        print(f"     [WARN] Error parsing PostgreSQL CSV: {e}")
+
+# ==============================================================================
 # 4. APPEND AND MERGE WITH MASTER DATASET (JSONL)
 # ==============================================================================
 existing_entries = []
